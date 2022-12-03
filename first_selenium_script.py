@@ -1,5 +1,7 @@
 import configparser
+from threading import Thread
 
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -24,32 +26,85 @@ options.add_argument("--incognito")
 browser = webdriver.Chrome(service=service, options=options)
 
 browser.get(quiz_url)
-browser.implicitly_wait(2)
+browser.implicitly_wait(5)
 print(f'titulo de la pagina => {browser.title}')
 
 # ButtonStartAssesment = browser.find_element(
 #     By.XPATH,
 #     '//*[@id="block-scrumorg-v2-content"]/article/div/section[3]/div/div/div/div/div/p[6]/a')
 # ButtonStartAssesment.click()
+
 ButtonContinue = browser.find_element(
     By.XPATH,
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
 ButtonContinue.click()
 
+ButtonContinue2 = browser.find_element(
+    By.XPATH,
+    '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
+ButtonContinue2.click()
 
+# ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
+try:
+    DivQuestion = browser.find_element(
+        By.XPATH,
+        # '//*[@id="question-*"]/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+        '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
 
+    if DivQuestion:
+        print(DivQuestion.text)
 
+        try:
+            for i in range(1, 6):
+                DivRadioTmp = DivRadio1 = browser.find_element(
+                    By.XPATH,
+                    f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[{i}]')
+                DivRadioTmp.click()
+                Thread.sleep(250)
 
+            # DivRadio1 = browser.find_element(
+            #     By.XPATH,
+            #     '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[1]')
+            # DivRadio1.click()
+            # Thread.sleep(250)
+            #
+            # DivRadio2 = browser.find_element(
+            #     By.XPATH,
+            #     '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[2]')
+            # DivRadio2.click()
+            # Thread.sleep(250)
+            #
+            # DivRadio3 = browser.find_element(
+            #     By.XPATH,
+            #     '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[3]')
+            # DivRadio3.click()
+            # Thread.sleep(250)
+            #
+            # DivRadio4 = browser.find_element(
+            #     By.XPATH,
+            #     '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[4]')
+            # DivRadio4.click()
+            # Thread.sleep(250)
+        except:
+            pass
 
+    ButtonNext = browser.find_element(
+        By.XPATH,
+        '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button')
+    ButtonNext.click()
+    Thread.sleep(250)
 
+except:
+    pass
 
+# SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE
+page_source = browser.page_source
+soup = BeautifulSoup(page_source, 'lxml')
 
-
-
-
-
-
-
+feedbacks = soup.find_all('div', class_='feedback')
+for feedback in feedbacks:
+    print(feedback.text)
+    print('-------------------------------------')  # just to separate the feedbacks
 
 # byid
 cart = browser.find_element(By.ID, 'site-header-cart')
