@@ -1,5 +1,5 @@
 import configparser
-from threading import Thread
+# from threading import Thread
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -52,11 +52,12 @@ while True:
             print(DivQuestion.text)
             try:
                 for i in range(1, 6):
-                    DivRadioTmp = DivRadio1 = browser.find_element(
+                    DivRadioTmp = browser.find_element(
                         By.XPATH,
-                        f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[{i}]')
+                        f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/*/ion-item[{i}]')
+                    # Thread.sleep(100)
                     DivRadioTmp.click()
-                    Thread.sleep(250)
+                    # Thread.sleep(100)
             except:
                 pass
         else:
@@ -65,7 +66,7 @@ while True:
             By.XPATH,
             '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button')
         ButtonNext.click()
-        Thread.sleep(250)
+        # Thread.sleep(250)
     except:
         break
 
@@ -77,6 +78,24 @@ feedbacks = soup.find_all('div', class_='feedback')
 for feedback in feedbacks:
     print(feedback.text)
     print('-------------------------------------')  # just to separate the feedbacks
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # byid
 cart = browser.find_element(By.ID, 'site-header-cart')
