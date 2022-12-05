@@ -66,17 +66,20 @@ while True:
     if DivQuestion:
         print(DivQuestion.text)
 
-        for i in range(1, 6):
-            for j in ('', '/ion-list'):  # El '' es para el checkBox, el /ion-list es para el radio button
-                DivCheckOrRadio = safeFindElement(
-                    browser, By.XPATH,
-                    f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list{j}/ion-item[{i}]'
-                )
-                if DivCheckOrRadio:
-                    DivCheckOrRadio.click()
-                    break
-            else:  # if no break occurred
-                break
+        # CHECKBOXES
+        a_block_of_answers = browser.find_elements(
+            By.XPATH,
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item')
+        if not a_block_of_answers:
+            # RADIO BUTTONS
+            a_block_of_answers = browser.find_elements(
+                By.XPATH,
+                '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
+
+        for answer in a_block_of_answers:
+            browser.execute_script("arguments[0].scrollIntoView(true);", answer)
+            answer.click()
+
         ButtonNext = safeFindElement(
             browser, By.XPATH, '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button'
         )
