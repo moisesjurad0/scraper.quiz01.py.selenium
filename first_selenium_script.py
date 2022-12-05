@@ -47,52 +47,31 @@ ButtonContinue2.click()
 # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
 
 while True:
-    try:
-        DivQuestion = browser.find_element(
-            By.XPATH,
-            # '//*[@id="question-*"]/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
-            '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+    DivQuestion = browser.find_element(
+        By.XPATH,
+        # '//*[@id="question-*"]/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+        '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
 
-        if DivQuestion:
-            print(DivQuestion.text)
+    if DivQuestion:
+        print(DivQuestion.text)
 
-            for i in range(1, 6):
-
-                errorOnFirst = False
-                try:
-                    DivCheckBoxTmp = browser.find_element(
-                        By.XPATH,
-                        f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-item[{i}]')
-                    # Thread.sleep(100)
-                    DivCheckBoxTmp.click()
-                    # Thread.sleep(100)
-                except Exception as e:
-                    logger.warning(e, exc_info=True)
-                    errorOnFirst = True
-
-                if errorOnFirst:
-                    try:
-                        DivRadioTmp = browser.find_element(
-                            By.XPATH,
-                            f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[{i}]')
-                        # Thread.sleep(100)
-                        DivRadioTmp.click()
-                        # Thread.sleep(100)
-                    except Exception as e:
-                        logger.warning(e, exc_info=True)
-
-
-
-
-        else:
-            break
+        for i in range(1, 6):
+            innerLoop = 0
+            for j in ('', '/ion-list'):
+                innerLoop += 1
+                DivCheckOrRadio = browser.find_element(
+                    By.XPATH,
+                    f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list{j}/ion-item[{i}]')
+                if DivCheckOrRadio:
+                    DivCheckOrRadio.click()
+                    break
+            if innerLoop == 2:
+                break
         ButtonNext = browser.find_element(
             By.XPATH,
             '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button')
         ButtonNext.click()
-        # Thread.sleep(250)
-    except Exception as e:
-        logger.warning(e, exc_info=True)
+    else:
         break
 
 # SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE
