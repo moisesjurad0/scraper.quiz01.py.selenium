@@ -34,42 +34,52 @@ browser.get(quiz_url)
 browser.implicitly_wait(5)
 print(f'titulo de la pagina => {browser.title}')
 
-ButtonContinue = browser.find_element(
-    By.XPATH,
-    '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
+
+def safeFindElement(browser_in, the_type, selector):
+    retorno = None
+    try:
+        retorno = browser_in.find_element(
+            the_type,
+            selector)
+    except Exception as e:
+        logger.warning(e, exc_info=True)
+    return retorno
+
+
+ButtonContinue = safeFindElement(
+    browser, By.XPATH,
+    '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button',
+)
 ButtonContinue.click()
 
-ButtonContinue2 = browser.find_element(
-    By.XPATH,
+ButtonContinue2 = safeFindElement(
+    browser, By.XPATH,
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
 ButtonContinue2.click()
 
 # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
-
 while True:
-    DivQuestion = browser.find_element(
-        By.XPATH,
-        # '//*[@id="question-*"]/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+    DivQuestion = safeFindElement(
+        browser, By.XPATH,
         '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
 
     if DivQuestion:
         print(DivQuestion.text)
 
         for i in range(1, 6):
-            innerLoop = 0
-            for j in ('', '/ion-list'):
-                innerLoop += 1
-                DivCheckOrRadio = browser.find_element(
-                    By.XPATH,
-                    f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list{j}/ion-item[{i}]')
+            for j in ('', '/ion-list'):  # El '' es para el checkBox, el /ion-list es para el radio button
+                DivCheckOrRadio = safeFindElement(
+                    browser, By.XPATH,
+                    f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list{j}/ion-item[{i}]'
+                )
                 if DivCheckOrRadio:
                     DivCheckOrRadio.click()
                     break
-            if innerLoop == 2:
+            else:  # if no break occurred
                 break
-        ButtonNext = browser.find_element(
-            By.XPATH,
-            '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button')
+        ButtonNext = safeFindElement(
+            browser, By.XPATH, '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button'
+        )
         ButtonNext.click()
     else:
         break
@@ -84,7 +94,7 @@ for feedback in feedbacks:
     print('-------------------------------------')  # just to separate the feedbacks
 
 # byid
-cart = browser.find_element(By.ID, 'site-header-cart')
+cart = safeFindElement(browser, By.ID, 'site-header-cart')
 print(f'site-header-cart => {cart}')
 print(f'tipo => {type(cart)}')
 cart_text = cart.text
