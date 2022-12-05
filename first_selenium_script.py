@@ -1,5 +1,5 @@
 import configparser
-# from threading import Thread
+import logging
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -7,6 +7,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+# from threading import Thread
+
+logger = logging.getLogger('scrapping01')
+logger.setLevel(logging.INFO)
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -50,16 +55,35 @@ while True:
 
         if DivQuestion:
             print(DivQuestion.text)
-            try:
-                for i in range(1, 6):
-                    DivRadioTmp = browser.find_element(
+
+            for i in range(1, 6):
+
+                errorOnFirst = False
+                try:
+                    DivCheckBoxTmp = browser.find_element(
                         By.XPATH,
-                        f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/*/ion-item[{i}]')
+                        f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-item[{i}]')
                     # Thread.sleep(100)
-                    DivRadioTmp.click()
+                    DivCheckBoxTmp.click()
                     # Thread.sleep(100)
-            except:
-                pass
+                except Exception as e:
+                    logger.warning(e, exc_info=True)
+                    errorOnFirst = True
+
+                if errorOnFirst:
+                    try:
+                        DivRadioTmp = browser.find_element(
+                            By.XPATH,
+                            f'/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item[{i}]')
+                        # Thread.sleep(100)
+                        DivRadioTmp.click()
+                        # Thread.sleep(100)
+                    except Exception as e:
+                        logger.warning(e, exc_info=True)
+
+
+
+
         else:
             break
         ButtonNext = browser.find_element(
@@ -67,7 +91,8 @@ while True:
             '//*[@id="test-contents"]/div[5]/ion-grid/ion-row/ion-col/ion-button')
         ButtonNext.click()
         # Thread.sleep(250)
-    except:
+    except Exception as e:
+        logger.warning(e, exc_info=True)
         break
 
 # SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE
@@ -78,24 +103,6 @@ feedbacks = soup.find_all('div', class_='feedback')
 for feedback in feedbacks:
     print(feedback.text)
     print('-------------------------------------')  # just to separate the feedbacks
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # byid
 cart = browser.find_element(By.ID, 'site-header-cart')
