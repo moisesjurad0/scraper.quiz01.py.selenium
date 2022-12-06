@@ -115,7 +115,12 @@ while True:
         btn_next_or_finish_now.click()
         time.sleep(1.5)
         # if btn_next_or_finish.text == 'Finish now':
-        if btn_next_or_finish_now.get_attribute('data_cy') == 'finish-btn':
+
+        atributo_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
+        print(f'atributo_data_cy->{atributo_data_cy}')
+        logger.info(f'atributo_data_cy->{atributo_data_cy}')
+
+        if atributo_data_cy == 'finish-btn':
             # seccion del boton "Confirm finish now"
             btn_confirm_finish_now = browser.find_element(
                 By.CSS_SELECTOR,
