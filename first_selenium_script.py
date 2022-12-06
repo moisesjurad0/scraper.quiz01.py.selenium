@@ -75,45 +75,54 @@ def safe_find_element(browser_in, the_type, selector):
     return obj_element
 
 
-ButtonContinue = safe_find_element(
+btn_continue = safe_find_element(
     browser, By.XPATH,
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button',
 )
-ButtonContinue.click()
+btn_continue.click()
 
-ButtonContinue2 = safe_find_element(
+btn_continue2 = safe_find_element(
     browser, By.XPATH,
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
-ButtonContinue2.click()
+btn_continue2.click()
 
 # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
 while True:
-    DivQuestion = safe_find_element(
+    div_question = safe_find_element(
         browser, By.XPATH,
         '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
 
-    if DivQuestion:
-        print(DivQuestion.text)
+    if div_question:
+        print(div_question.text)
 
-        # CHECKBOXES
+        # CHECKBOXES or RADIO BUTTONS
         a_block_of_answers = browser.find_elements(
             By.XPATH,
-            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item')
-        if not a_block_of_answers:
-            # RADIO BUTTONS
-            a_block_of_answers = browser.find_elements(
-                By.XPATH,
-                '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
+            ' | '
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
 
         for answer in a_block_of_answers:
             browser.execute_script(
                 "arguments[0].scrollIntoView(true);", answer)
             answer.click()
 
-        ButtonNext = browser.find_element(
-            By.CSS_SELECTOR, "ion-button[data-cy='continue-btn']")
-        ButtonNext.click()
-        time.sleep(1)
+        btn_next_or_finish_now = browser.find_element(
+            By.CSS_SELECTOR,
+            'ion-button[data-cy="continue-btn"]'
+            ','
+            'ion-button[data-cy="finish-btn"]')
+        btn_next_or_finish_now.click()
+        time.sleep(1.5)
+        # if btn_next_or_finish.text == 'Finish now':
+        if btn_next_or_finish_now.get_attribute('data_cy') == 'finish-btn':
+            # seccion del boton "Confirm finish now"
+            btn_confirm_finish_now = browser.find_element(
+                By.CSS_SELECTOR,
+                '//*[@id="test_confirm_finish"]')
+            btn_confirm_finish_now.click()
+            time.sleep(2)
+            break
     else:
         break
 
