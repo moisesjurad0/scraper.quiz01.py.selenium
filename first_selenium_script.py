@@ -86,6 +86,8 @@ btn_continue2 = safe_find_element(
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
 btn_continue2.click()
 
+contadorDePreguntas = 0
+
 # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
 while True:
     div_question = safe_find_element(
@@ -94,6 +96,7 @@ while True:
 
     if div_question:
         print(div_question.text)
+        contadorDePreguntas += 1
 
         # CHECKBOXES or RADIO BUTTONS
         a_block_of_answers = browser.find_elements(
@@ -101,6 +104,10 @@ while True:
             '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
             ' | '
             '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
+
+        if contadorDePreguntas == 29:
+            logger.info('29')
+            print('29')
 
         for answer in a_block_of_answers:
             browser.execute_script(
@@ -112,18 +119,19 @@ while True:
             'ion-button[data-cy="continue-btn"]'
             ','
             'ion-button[data-cy="finish-btn"]')
+
+        attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
+        print(f'atributo_data_cy->{attribute_data_cy}')
+        logger.info(f'atributo_data_cy->{attribute_data_cy}')
+
         btn_next_or_finish_now.click()
         time.sleep(1.5)
         # if btn_next_or_finish.text == 'Finish now':
 
-        atributo_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
-        print(f'atributo_data_cy->{atributo_data_cy}')
-        logger.info(f'atributo_data_cy->{atributo_data_cy}')
-
-        if atributo_data_cy == 'finish-btn':
+        if attribute_data_cy == 'finish-btn':
             # seccion del boton "Confirm finish now"
             btn_confirm_finish_now = browser.find_element(
-                By.CSS_SELECTOR,
+                By.XPATH,
                 '//*[@id="test_confirm_finish"]')
             btn_confirm_finish_now.click()
             time.sleep(2)
