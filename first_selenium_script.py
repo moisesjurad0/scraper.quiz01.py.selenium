@@ -6,6 +6,7 @@ Returns:
 
 import configparser
 import logging
+import time
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -112,6 +113,7 @@ while True:
         ButtonNext = browser.find_element(
             By.CSS_SELECTOR, "ion-button[data-cy='continue-btn']")
         ButtonNext.click()
+        time.sleep(1)
     else:
         break
 
