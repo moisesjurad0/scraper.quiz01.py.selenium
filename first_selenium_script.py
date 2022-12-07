@@ -153,6 +153,8 @@ def main():
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
+        pregunta_text = feedback
+
         # para checkBox es circular-tick, para radio es circular-tick-holo
         correctosCheck = feedback.find_all('ion-icon', class_='circular-tick')
         correctosRadio = feedback.find_all('ion-icon', class_='circular-tick-holo')
@@ -163,6 +165,8 @@ def main():
         elif correctosRadio:
             for correcto in correctosRadio:
                 print(correcto)
+                # bs4.element.NavigableString
+                texto_correcto = correcto.previous_sibling.div.div.next_sibling.div.next_element
 
     # browser.quit()
     # browser.close()
