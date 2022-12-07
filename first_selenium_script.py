@@ -153,20 +153,23 @@ def main():
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-        pregunta_text = feedback
+        f_question_text = (feedback.contents[0].contents[0].next_sibling.
+                           contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
 
         # para checkBox es circular-tick, para radio es circular-tick-holo
-        correctosCheck = feedback.find_all('ion-icon', class_='circular-tick')
-        correctosRadio = feedback.find_all('ion-icon', class_='circular-tick-holo')
+        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
+        correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
 
-        if correctosCheck:
-            for correcto in correctosCheck:
-                print(correcto)
-        elif correctosRadio:
-            for correcto in correctosRadio:
-                print(correcto)
+        if correct_checks:
+            for correct_option in correct_checks:
+                print(correct_option)
+                # aun no he probado que funcione con checkboxes
+                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+        elif correct_radios:
+            for correct_option in correct_radios:
+                print(correct_option)
                 # bs4.element.NavigableString
-                texto_correcto = correcto.previous_sibling.div.div.next_sibling.div.next_element
+                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
 
     # browser.quit()
     # browser.close()
