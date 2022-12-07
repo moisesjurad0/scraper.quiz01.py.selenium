@@ -127,11 +127,14 @@ def main():
             print(f'atributo_data_cy->{attribute_data_cy}')
             logger.info(f'atributo_data_cy->{attribute_data_cy}')
 
-            btn_next_or_finish_now.click()
-            time.sleep(1.5)
-            # if btn_next_or_finish.text == 'Finish now':
-
-            if attribute_data_cy == 'finish-btn':
+            if attribute_data_cy == 'continue-btn':
+                btn_next_or_finish_now.click()
+                time.sleep(1.5)
+            elif attribute_data_cy == 'finish-btn':
+                # seccion del boton "Confirm finish"
+                time.sleep(2)
+                btn_next_or_finish_now.click()
+                time.sleep(2)
                 # seccion del boton "Confirm finish now"
                 btn_confirm_finish_now = browser.find_element(
                     By.XPATH,
@@ -149,27 +152,38 @@ def main():
     feedbacks = soup.find_all('div', class_='feedback')
     for feedback in feedbacks:
         print(feedback.text)
+        logger.info(feedback.text)
         # just to separate the feedbacks
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
+        # # radio question
+        # f_question_text = (feedback.contents[0].contents[0].next_sibling.
+        #                    contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+
+        # check question
         f_question_text = (feedback.contents[0].contents[0].next_sibling.
-                           contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+                           div.contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+
+        print(f_question_text)
+        logger.info(f_question_text)
 
         # para checkBox es circular-tick, para radio es circular-tick-holo
-        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
         correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
+        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
 
-        if correct_checks:
-            for correct_option in correct_checks:
-                print(correct_option)
-                # aun no he probado que funcione con checkboxes
-                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
-        elif correct_radios:
+        if correct_radios:
             for correct_option in correct_radios:
-                print(correct_option)
                 # bs4.element.NavigableString
                 f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+                print(f_correct_answer_text)
+                logger.info(f_correct_answer_text)
+        elif correct_checks:
+            for correct_option in correct_checks:
+                # aun no he probado que funcione con checkboxes
+                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+                print(f_correct_answer_text)
+                logger.info(f_correct_answer_text)
 
     # browser.quit()
     # browser.close()
