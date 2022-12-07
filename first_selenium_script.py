@@ -147,7 +147,23 @@ feedbacks = soup.find_all('div', class_='feedback')
 for feedback in feedbacks:
     print(feedback.text)
     # just to separate the feedbacks
-    print('-------------------------------------')
+    #print('-------------------------------------')
+    # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
+
+    #para checkBox es circular-tick, para radio es circular-tick-holo
+    correctosCheck=feedback.find_all('ion-icon', class_='circular-tick')
+    correctosRadio=feedback.find_all('ion-icon', class_='circular-tick-holo')
+
+    if correctosCheck:
+        for correcto in correctosCheck:
+            print(correcto)
+    elif correctosRadio:
+        for correcto in correctosRadio:
+            print(correcto)
+
+
+
+
 
 # # byid
 # cart = safe_find_element(browser, By.ID, 'site-header-cart')
