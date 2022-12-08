@@ -131,7 +131,7 @@ def main():
         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
     btn_continue2.click()
 
-    print('ANSWERING QUESTIONS WITH REAL OR UNREAL DATA')
+    print('ANSWERING QUESTIONS WITH UNREAL DATA')
     logger.info('ANSWERING QUESTIONS WITH REAL OR UNREAL DATA')
     while True:
         div_question = _safe_find_element(
@@ -149,9 +149,9 @@ def main():
                 '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
 
             for answer in a_block_of_answers:
-                browser.execute_script(
-                    "arguments[0].scrollIntoView(true);", answer)
-                answer.click()
+                browser.execute_script("arguments[0].scrollIntoView(true);", answer)
+                # answer.click()
+                browser.execute_script("arguments[0].click();", answer)
 
             btn_next_or_finish_now = browser.find_element(
                 By.CSS_SELECTOR,
