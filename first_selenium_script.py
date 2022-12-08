@@ -87,7 +87,6 @@ def main():
 
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
-    exam_url = config['DEFAULT']['exam_url']
     quiz_url = config['DEFAULT']['quiz_url']
 
     service = Service(driver_path)
