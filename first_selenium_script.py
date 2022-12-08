@@ -206,9 +206,8 @@ def main():
             print(f_correct_answer_text)
             logger.info(f_correct_answer_text)
 
-
-# browser.quit()
-# browser.close()
+    # browser.close()
+    browser.quit()
 
 
 if __name__ == "__main__":
