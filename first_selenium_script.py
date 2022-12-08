@@ -152,38 +152,49 @@ def main():
     feedbacks = soup.find_all('div', class_='feedback')
     for feedback in feedbacks:
         print(feedback.text)
-        logger.info(feedback.text)
+        #logger.info(feedback.text)
         # just to separate the feedbacks
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-        # # radio question
-        # f_question_text = (feedback.contents[0].contents[0].next_sibling.
-        #                    contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+        # radio question
+        flag_radio_question = False
+        try:
+            f_question_text = (feedback.contents[0].contents[0].next_sibling.
+                               contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+            flag_radio_question = True
+        except Exception as e:
+            logger.error(str(e), exc_info=True)
 
-        # check question
-        f_question_text = (feedback.contents[0].contents[0].next_sibling.
-                           div.contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+        # check question or maybe radio question too
+        flag_check_question = False
+        if not flag_radio_question:
+            try:
+                f_question_text = (feedback.contents[0].contents[0].next_sibling.
+                                   div.contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+                flag_check_question = True
+            except Exception as e:
+                logger.error(str(e), exc_info=True)
 
         print(f_question_text)
         logger.info(f_question_text)
 
-        # para checkBox es circular-tick, para radio es circular-tick-holo
-        correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
-        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
-
-        if correct_radios:
+        if flag_radio_question:
+            correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
             for correct_option in correct_radios:
                 # bs4.element.NavigableString
                 f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
-        elif correct_checks:
+        elif flag_check_question:
+            correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
             for correct_option in correct_checks:
                 # aun no he probado que funcione con checkboxes
                 f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
+
+
 
     # browser.quit()
     # browser.close()
