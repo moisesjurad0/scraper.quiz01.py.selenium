@@ -88,6 +88,7 @@ def main():
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
     quiz_url = config['DEFAULT']['quiz_url']
+    implicitly_wait = config.getint('DEFAULT', 'implicitly_wait')
 
     service = Service(driver_path)
     options = Options()
@@ -112,7 +113,10 @@ def main():
     browser = webdriver.Chrome(service=service, options=options)
 
     browser.get(quiz_url)
-    browser.implicitly_wait(5)
+    if not implicitly_wait > 0:
+        implicitly_wait = 5
+    browser.implicitly_wait(implicitly_wait)
+
     print(f'titulo de la pagina => {browser.title}')
     logger.info(f'titulo de la pagina => {browser.title}')
 
