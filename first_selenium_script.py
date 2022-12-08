@@ -8,6 +8,7 @@ import logging
 import sys
 import time
 
+import bs4
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -23,6 +24,54 @@ logger.info('inicio')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+
+def _safe_find_element(browser_in, the_type, selector):
+    """Buscar elemento de manera segura.
+
+    Args:
+        browser_in (_type_): _description_
+        the_type (_type_): _description_
+        selector (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    obj_element = None
+    try:
+        obj_element = browser_in.find_element(
+            the_type,
+            selector)
+    except Exception as e:
+        logger.warning(e, exc_info=True)
+    return obj_element
+
+
+def _determine_question_type(feedback) -> {str, bs4.element.NavigableString}:
+    """Determinar el tipo de pregunta."""
+    input_type = ''
+    question_text = bs4.NavigableString('')
+
+    try:
+        question_text = (
+            feedback.contents[0].contents[0].next_sibling.
+            contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+        input_type = 'RADIO'
+    except Exception as e1:
+        logger.error(str(e1), exc_info=True)
+        try:
+            question_text = (
+                feedback.contents[0].contents[0].next_sibling.div.
+                contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+            if question_text == 'True or False:':
+                input_type = 'RADIO'
+                question_text = question_text.next_element
+            else:
+                input_type = 'CHECK'
+        except Exception as e2:
+            logger.error(str(e2), exc_info=True)
+
+    return input_type, question_text
 
 
 def main():
@@ -58,33 +107,13 @@ def main():
     print(f'titulo de la pagina => {browser.title}')
     logger.info(f'titulo de la pagina => {browser.title}')
 
-    def safe_find_element(browser_in, the_type, selector):
-        """Buscar elemento de manera segura.
-
-        Args:
-            browser_in (_type_): _description_
-            the_type (_type_): _description_
-            selector (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """
-        obj_element = None
-        try:
-            obj_element = browser_in.find_element(
-                the_type,
-                selector)
-        except Exception as e:
-            logger.warning(e, exc_info=True)
-        return obj_element
-
-    btn_continue = safe_find_element(
+    btn_continue = _safe_find_element(
         browser, By.XPATH,
         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button',
     )
     btn_continue.click()
 
-    btn_continue2 = safe_find_element(
+    btn_continue2 = _safe_find_element(
         browser, By.XPATH,
         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
     btn_continue2.click()
@@ -93,7 +122,7 @@ def main():
 
     # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
     while True:
-        div_question = safe_find_element(
+        div_question = _safe_find_element(
             browser, By.XPATH,
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
 
@@ -152,52 +181,34 @@ def main():
     feedbacks = soup.find_all('div', class_='feedback')
     for feedback in feedbacks:
         print(feedback.text)
-        #logger.info(feedback.text)
+        # logger.info(feedback.text)
         # just to separate the feedbacks
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-        # radio question
-        flag_radio_question = False
-        try:
-            f_question_text = (feedback.contents[0].contents[0].next_sibling.
-                               contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
-            flag_radio_question = True
-        except Exception as e:
-            logger.error(str(e), exc_info=True)
+    f_type, f_question_text = _determine_question_type(feedback)
 
-        # check question or maybe radio question too
-        flag_check_question = False
-        if not flag_radio_question:
-            try:
-                f_question_text = (feedback.contents[0].contents[0].next_sibling.
-                                   div.contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
-                flag_check_question = True
-            except Exception as e:
-                logger.error(str(e), exc_info=True)
+    print(f_question_text)
+    logger.info(f_question_text)
 
-        print(f_question_text)
-        logger.info(f_question_text)
-
-        if flag_radio_question:
-            correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
-            for correct_option in correct_radios:
-                # bs4.element.NavigableString
-                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
-                print(f_correct_answer_text)
-                logger.info(f_correct_answer_text)
-        elif flag_check_question:
-            correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
-            for correct_option in correct_checks:
-                # aun no he probado que funcione con checkboxes
-                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
-                print(f_correct_answer_text)
-                logger.info(f_correct_answer_text)
+    if f_type == 'RADIO':
+        correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
+        for correct_option in correct_radios:
+            # bs4.element.NavigableString
+            f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+            print(f_correct_answer_text)
+            logger.info(f_correct_answer_text)
+    elif f_type == 'CHECK':
+        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
+        for correct_option in correct_checks:
+            # aun no he probado que funcione con checkboxes
+            f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+            print(f_correct_answer_text)
+            logger.info(f_correct_answer_text)
 
 
-
-    # browser.quit()
-    # browser.close()
+# browser.quit()
+# browser.close()
 
 
 if __name__ == "__main__":
