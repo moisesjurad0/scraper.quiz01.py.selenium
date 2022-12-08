@@ -4,9 +4,11 @@ Returns:
     _type_: _description_
 """
 import configparser
+import datetime
 import logging
 import sys
 import time
+import uuid
 
 import bs4
 from bs4 import BeautifulSoup
@@ -15,9 +17,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
-# from threading import Thread
-logging.basicConfig(filename='myfirstlog.log', level=logging.DEBUG,
-                    format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+import send
+
+currentDT = datetime.datetime.now()
+logging.basicConfig(
+    filename=f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
+    level=logging.INFO,
+    format='%(asctime)s | %(name)s | %(levelname)s | [%(filename)s:%(lineno)d] | %(message)s')
 logger = logging.getLogger('scrapping01')
 logger.setLevel(logging.INFO)
 logger.info('inicio')
@@ -75,6 +81,10 @@ def _determine_question_type(feedback) -> {str, bs4.element.NavigableString}:
 
 
 def main():
+    v_uuid = uuid.uuid4().hex
+    print(f'v_uuid->{v_uuid}')
+    logger.info(f'v_uuid->{v_uuid}')
+
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
     exam_url = config['DEFAULT']['exam_url']
@@ -118,8 +128,6 @@ def main():
         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
     btn_continue2.click()
 
-    contadorDePreguntas = 0
-
     # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
     while True:
         div_question = _safe_find_element(
@@ -128,7 +136,6 @@ def main():
 
         if div_question:
             print(div_question.text)
-            contadorDePreguntas += 1
 
             # CHECKBOXES or RADIO BUTTONS
             a_block_of_answers = browser.find_elements(
@@ -136,10 +143,6 @@ def main():
                 '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
                 ' | '
                 '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
-
-            if contadorDePreguntas == 30:
-                logger.info('30')
-                print('30')
 
             for answer in a_block_of_answers:
                 browser.execute_script(
@@ -153,8 +156,6 @@ def main():
                 'ion-button[data-cy="finish-btn"]')
 
             attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
-            print(f'atributo_data_cy->{attribute_data_cy}')
-            logger.info(f'atributo_data_cy->{attribute_data_cy}')
 
             if attribute_data_cy == 'continue-btn':
                 btn_next_or_finish_now.click()
@@ -178,36 +179,40 @@ def main():
     page_source = browser.page_source
     soup = BeautifulSoup(page_source, 'lxml')
 
+    contador_preguntas = 0
     feedbacks = soup.find_all('div', class_='feedback')
     for feedback in feedbacks:
+        contador_preguntas += 1
         print(feedback.text)
         # logger.info(feedback.text)
         # just to separate the feedbacks
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-    f_type, f_question_text = _determine_question_type(feedback)
+        f_type, f_question_text = _determine_question_type(feedback)
 
-    print(f_question_text)
-    logger.info(f_question_text)
+        print(f'Q{contador_preguntas} - {f_question_text}')
+        logger.info(f'Q{contador_preguntas} - {f_question_text}')
 
-    if f_type == 'RADIO':
-        correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
-        for correct_option in correct_radios:
-            # bs4.element.NavigableString
-            f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
-            print(f_correct_answer_text)
-            logger.info(f_correct_answer_text)
-    elif f_type == 'CHECK':
-        correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
-        for correct_option in correct_checks:
-            # aun no he probado que funcione con checkboxes
-            f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
-            print(f_correct_answer_text)
-            logger.info(f_correct_answer_text)
-
-    # browser.close()
-    browser.quit()
+        if f_type == 'RADIO':
+            correct_radios = feedback.find_all('ion-icon', class_='circular-tick-holo')
+            for correct_option in correct_radios:
+                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+                print(f_correct_answer_text)
+                logger.info(f_correct_answer_text)
+                send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
+                            f_correct_answer_text, True)
+        elif f_type == 'CHECK':
+            correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
+            for correct_option in correct_checks:
+                f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+                print(f_correct_answer_text)
+                logger.info(f_correct_answer_text)
+                send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
+                            f_correct_answer_text, True)
+        print(f'Q{contador_preguntas} - END')
+        logger.info(f'Q{contador_preguntas} - END')
+    browser.quit()  # browser.close()
 
 
 if __name__ == "__main__":
