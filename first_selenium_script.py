@@ -128,7 +128,8 @@ def main():
         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
     btn_continue2.click()
 
-    # ANSWERING QUESTIONS WITH REAL OR UNREAL DATA
+    print('ANSWERING QUESTIONS WITH REAL OR UNREAL DATA')
+    logger.info('ANSWERING QUESTIONS WITH REAL OR UNREAL DATA')
     while True:
         div_question = _safe_find_element(
             browser, By.XPATH,
@@ -175,7 +176,8 @@ def main():
         else:
             break
 
-    # SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE
+    print('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
+    logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
     page_source = browser.page_source
     soup = BeautifulSoup(page_source, 'lxml')
 
