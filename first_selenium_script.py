@@ -7,7 +7,6 @@ import configparser
 import datetime
 import logging
 import sys
-import time
 import uuid
 
 import bs4
@@ -32,27 +31,6 @@ logger.info('inicio')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-
-
-def _safe_find_element(browser_in, the_type, selector):
-    """Buscar elemento de manera segura.
-
-    Args:
-        browser_in (_type_): _description_
-        the_type (_type_): _description_
-        selector (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    obj_element = None
-    try:
-        obj_element = browser_in.find_element(
-            the_type,
-            selector)
-    except Exception as e:
-        logger.warning(e, exc_info=True)
-    return obj_element
 
 
 def _determine_question_type(feedback) -> {str, bs4.element.NavigableString}:
@@ -90,7 +68,10 @@ def main():
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
     quiz_url = config['DEFAULT']['quiz_url']
-    implicitly_wait = config.getint('DEFAULT', 'implicitly_wait')
+    ew = 20  # explicit_wait
+
+    # default is zero - don't activate this cause will  interfere with WebDriverWait
+    # implicitly_wait = config.getint('DEFAULT', 'implicitly_wait')
 
     service = Service(driver_path)
     options = Options()
@@ -120,88 +101,92 @@ def main():
     # page_source = driver.page_source
     # soup = BeautifulSoup(page_source, 'lxml')  # codigo para probar si tenemos lxml antes de empezar
 
-    if not implicitly_wait > 0:
-        implicitly_wait = 5
-    driver.implicitly_wait(implicitly_wait)
+    # default is zero - don't activate this cause will  interfere with WebDriverWait
+    # driver.implicitly_wait(implicitly_wait)
 
-    btn_continue = _safe_find_element(
-        driver, By.XPATH,
-        '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button',
-    )
-    btn_continue.click()
+    # press 1st button Next
+    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+        (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button'))).click()
 
-    btn_continue2 = _safe_find_element(
-        driver, By.XPATH,
-        '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
-    btn_continue2.click()
+    # press 2nd button Next
+    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+        (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]'))).click()
 
-    print('ANSWERING QUESTIONS WITH UNREAL DATA')
-    logger.info('ANSWERING QUESTIONS WITH REAL OR UNREAL DATA')
+    str_tmp = 'ANSWERING QUESTIONS WITH UNREAL DATA'
+    print(str_tmp)
+    logger.info(str_tmp)
     while True:
-        div_question = _safe_find_element(
-            driver, By.XPATH,
-            '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+        div_xpath = (
+            '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
+            'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+        WebDriverWait(driver, ew).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
+        div_question_text = WebDriverWait(driver, ew).until(
+            EC.visibility_of_element_located((By.XPATH, div_xpath))).text
+        print(div_question_text)
 
-        if div_question:
-            print(div_question.text)
+        # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located((By.XPATH, div_xpath)))
+        # div_question = WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, div_xpath)))
+        # print(div_question.text)
 
-            # CHECKBOXES or RADIO BUTTONS
-            a_block_of_answers = driver.find_elements(
-                By.XPATH,
-                '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
-                ' | '
-                '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
+        # CHECKBOXES or RADIO BUTTONS
+        a_block_of_answers = driver.find_elements(
+            By.XPATH,
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
+            ' | '
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
 
-            for answer in a_block_of_answers:
-                driver.execute_script("arguments[0].scrollIntoView(true);", answer)
-                # browser.execute_script("arguments[0].click();", answer)
-                # answer.click()
-                WebDriverWait(driver, 20).until(EC.element_to_be_clickable(answer)).click()
+        for answer in a_block_of_answers:
+            driver.execute_script("arguments[0].scrollIntoView(true);", answer)
+            # browser.execute_script("arguments[0].click();", answer)
+            # answer.click()
+            WebDriverWait(driver, ew).until(EC.element_to_be_clickable(answer)).click()
 
-            btn_css_selector = (
-                'ion-button[data-cy="continue-btn"]'
-                ','
-                'ion-button[data-cy="finish-btn"]')
-            WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, btn_css_selector)))
-            btn_next_or_finish_now = driver.find_element(
-                By.CSS_SELECTOR,
-                btn_css_selector)
+        btn_css_selector = (
+            'ion-button[data-cy="continue-btn"]'
+            ','
+            'ion-button[data-cy="finish-btn"]')
+        WebDriverWait(driver, ew).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, btn_css_selector)))
+        btn_next_or_finish_now = driver.find_element(
+            By.CSS_SELECTOR,
+            btn_css_selector)
 
-            attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
+        attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
 
-            if attribute_data_cy == 'continue-btn':
-                btn_next_or_finish_now.click()
-                # WebDriverWait(driver, 20).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
-                time.sleep(2)  # Este se encarga de waitear a la pregunta, de arriba que es donde se cae
-            elif attribute_data_cy == 'finish-btn':
-                # seccion del boton "Confirm finish"
-                # time.sleep(2)
-                btn_next_or_finish_now.click()
-                # WebDriverWait(driver, 20).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
-                # time.sleep(2)
-                # seccion del boton "Confirm finish now"
-                # btn_confirm_finish_now = driver.find_element(
-                #     By.XPATH,
-                #     '//*[@id="test_confirm_finish"]')
-                # btn_confirm_finish_now.click()
-                WebDriverWait(driver, 20).until(
-                    EC.element_to_be_clickable((
-                        By.XPATH, '//*[@id="test_confirm_finish"]')
-                    )).click()
-                break
-        else:
+        if attribute_data_cy == 'continue-btn':
+            btn_next_or_finish_now.click()
+            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
+            # time.sleep(2)  # Este se encarga de waitear a la pregunta, de arriba que es donde se cae
+        elif attribute_data_cy == 'finish-btn':
+            # seccion del boton "Confirm finish"
+            # time.sleep(2)
+            btn_next_or_finish_now.click()
+            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
+            # time.sleep(2)
+            # seccion del boton "Confirm finish now"
+            # btn_confirm_finish_now = driver.find_element(
+            #     By.XPATH,
+            #     '//*[@id="test_confirm_finish"]')
+            # btn_confirm_finish_now.click()
+            WebDriverWait(driver, ew).until(
+                EC.element_to_be_clickable((
+                    By.XPATH, '//*[@id="test_confirm_finish"]')
+                )).click()
             break
 
-    print('HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
-    logger.info('HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
-    # WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
+    str_tmp = 'HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA'
+    print(str_tmp)
+    logger.info(str_tmp)
 
-    print('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
-    logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
+    # WebDriverWait(driver, ew).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
+    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
+    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
+    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
+
+    str_tmp = 'SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE'
+    print(str_tmp)
+    logger.info(str_tmp)
+
     page_source = driver.page_source
     soup = BeautifulSoup(page_source, 'html.parser')
 
@@ -244,6 +229,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+        logger.info('fin')
         sys.exit(0)
     except Exception as e:
         logger.error(str(e), exc_info=True)
