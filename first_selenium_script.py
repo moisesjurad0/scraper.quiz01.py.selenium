@@ -117,6 +117,9 @@ def main():
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(quiz_url)
 
+    page_source = driver.page_source
+    soup = BeautifulSoup(page_source, 'lxml')  # codigo para probar si tenemos lxml antes de empezar
+
     if not implicitly_wait > 0:
         implicitly_wait = 5
     driver.implicitly_wait(implicitly_wait)
