@@ -119,10 +119,14 @@ def main():
         div_xpath = (
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
             'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
-        WebDriverWait(driver, ew).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
-        div_question_text = WebDriverWait(driver, ew).until(
-            EC.visibility_of_element_located((By.XPATH, div_xpath))).text
-        print(div_question_text)
+        try:
+            WebDriverWait(driver, ew).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
+        except Exception as ex1:
+            logger.error(str(ex1), exc_info=True)
+        finally:
+            div_question_text = WebDriverWait(driver, ew).until(
+                EC.visibility_of_element_located((By.XPATH, div_xpath))).text
+            print(div_question_text)
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located((By.XPATH, div_xpath)))
         # div_question = WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, div_xpath)))
