@@ -117,8 +117,8 @@ def main():
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(quiz_url)
 
-    page_source = driver.page_source
-    soup = BeautifulSoup(page_source, 'lxml')  # codigo para probar si tenemos lxml antes de empezar
+    # page_source = driver.page_source
+    # soup = BeautifulSoup(page_source, 'lxml')  # codigo para probar si tenemos lxml antes de empezar
 
     if not implicitly_wait > 0:
         implicitly_wait = 5
@@ -203,7 +203,7 @@ def main():
     print('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
     logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
     page_source = driver.page_source
-    soup = BeautifulSoup(page_source, 'lxml')
+    soup = BeautifulSoup(page_source, 'html.parser')
 
     contador_preguntas = 0
     feedbacks = soup.find_all('div', class_='feedback')
@@ -227,7 +227,7 @@ def main():
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
                 send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                            f_correct_answer_text, True)
+                            f_correct_answer_text, True, currentDT)
         elif f_type == 'CHECK':
             correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
             for correct_option in correct_checks:
@@ -235,7 +235,7 @@ def main():
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
                 send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                            f_correct_answer_text, True)
+                            f_correct_answer_text, True, currentDT)
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
     driver.quit()  # browser.close()

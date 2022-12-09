@@ -4,7 +4,7 @@ import requests
 
 
 # def create(v_id, v_uuid, question, question_type, answer, flag_correct):
-def create(v_id, question, question_type, answer, flag_correct):
+def create(v_id, question, question_type, answer, flag_correct, last_modify):
     url = ""
 
     payload = json.dumps({
@@ -13,7 +13,8 @@ def create(v_id, question, question_type, answer, flag_correct):
         "question": question,
         "question_type": question_type,
         "answer": answer,
-        "correct": flag_correct
+        "correct": flag_correct,
+        "last_modify": last_modify
     })
     headers = {
         'x-api-key': '',
