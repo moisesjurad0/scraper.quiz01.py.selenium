@@ -227,7 +227,7 @@ def main():
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
                 send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                            f_correct_answer_text, True, currentDT)
+                            f_correct_answer_text, True, currentDT.isoformat())
         elif f_type == 'CHECK':
             correct_checks = feedback.find_all('ion-icon', class_='circular-tick')
             for correct_option in correct_checks:
@@ -235,7 +235,7 @@ def main():
                 print(f_correct_answer_text)
                 logger.info(f_correct_answer_text)
                 send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                            f_correct_answer_text, True, currentDT)
+                            f_correct_answer_text, True, currentDT.isoformat())
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
     driver.quit()  # browser.close()
