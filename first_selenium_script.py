@@ -101,26 +101,25 @@ def main():
     # opts_chrome.add_argument(f'user-agent={userAgent}')
     # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
     # opts_chrome.add_argument("headless")
-    options.add_argument("start-maximized")
-    options.add_argument("--incognito")
-    options.add_argument("disable-infobars")
-    options.add_argument("--disable-extensions")
-    options.add_argument("disable-extensions")
+    options.add_argument("--start-fullscreen")  # or with --
+    # options.add_argument("start-maximized")
+    options.add_argument("--incognito")  # or without --
+    # options.add_argument("--disable-infobars") #not working on latest versions of driver
+    # options.add_argument("--disable-extensions")
     options.add_argument("allow-insecure-localhost")
     options.add_argument("ignore-ssl-errors=yes")
     options.add_argument("ignore-certificate-errors")
     options.add_argument("--log-level=3")
+    options.add_experimental_option("useAutomationExtension", False)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
-    # Create new Instance of Chrome
+    # Create new Instance of Navigator
     driver = webdriver.Chrome(service=service, options=options)
-
     driver.get(quiz_url)
+
     if not implicitly_wait > 0:
         implicitly_wait = 5
     driver.implicitly_wait(implicitly_wait)
-
-    print(f'titulo de la pagina => {driver.title}')
-    logger.info(f'titulo de la pagina => {driver.title}')
 
     btn_continue = _safe_find_element(
         driver, By.XPATH,
@@ -187,11 +186,15 @@ def main():
                     EC.element_to_be_clickable((
                         By.XPATH, '//*[@id="test_confirm_finish"]')
                     )).click()
-                time.sleep(4)
                 break
         else:
             break
     # HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA#
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="contents"]/div')))
+
     print('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
     logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
     page_source = driver.page_source
