@@ -120,7 +120,7 @@ def main():
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
             'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
         try:
-            WebDriverWait(driver, ew).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
+            WebDriverWait(driver, 10).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
         except Exception as ex1:
             logger.error(str(ex1), exc_info=True)
         finally:
