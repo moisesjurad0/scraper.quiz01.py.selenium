@@ -9,7 +9,6 @@ import logging
 import sys
 import uuid
 
-import bs4
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -33,10 +32,10 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
-def _determine_question_type(feedback) -> {str, bs4.element.NavigableString}:
+def _analyze_question(feedback) -> {str, str}:
     """Determinar el tipo de pregunta."""
     input_type = ''
-    question_text = bs4.NavigableString('')
+    question_text = ''
 
     try:
         question_text = (
@@ -45,15 +44,24 @@ def _determine_question_type(feedback) -> {str, bs4.element.NavigableString}:
         input_type = 'RADIO'
     except Exception as e1:
         logger.error(str(e1), exc_info=True)
+
         try:
             question_text = (
                 feedback.contents[0].contents[0].next_sibling.div.
                 contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+            input_type = 'CHECK'
+
             if question_text == 'True or False:':
                 input_type = 'RADIO'
                 question_text = question_text.next_element
-            else:
-                input_type = 'CHECK'
+
+            elif question_text[-1] == ' ':
+                if str(question_text.next_element.next_element) == 'NOT':
+                    question_text = (
+                        f'{question_text}'
+                        f'{question_text.next_element.next_element}'
+                        f'{question_text.next_element.next_element.next_element}')
+
         except Exception as e2:
             logger.error(str(e2), exc_info=True)
 
@@ -120,7 +128,7 @@ def main():
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
             'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
         try:
-            WebDriverWait(driver, 5).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
+            WebDriverWait(driver, 3).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
         except Exception as ex1:
             logger.error(str(ex1), exc_info=True)
         finally:
@@ -204,7 +212,7 @@ def main():
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-        f_type, f_question_text = _determine_question_type(feedback)
+        f_type, f_question_text = _analyze_question(feedback)
 
         print(f'Q{contador_preguntas} - {f_question_text}')
         logger.info(f'Q{contador_preguntas} - {f_question_text}')
