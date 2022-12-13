@@ -86,7 +86,7 @@ def main():
         exam_number = config['DEFAULT']['exam_to_do']
     else:
         exam_number = args.examnumber
-    exam_section = f'EXAM{exam_number}'
+    exam_section = f'EXAM-{exam_number}'
     quiz_url = config[exam_section]['quiz_url']
     api_create = config[exam_section]['api_create']
     x_api_key = config[exam_section]['x-api-key']
