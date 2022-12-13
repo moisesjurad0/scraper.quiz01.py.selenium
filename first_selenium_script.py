@@ -3,6 +3,7 @@
 Returns:
     _type_: _description_
 """
+import argparse
 import configparser
 import datetime
 import logging
@@ -52,7 +53,7 @@ def _analyze_question(feedback) -> {str, str}:
             input_type = 'CHECK'
 
             if question_text == 'True or False:':
-                input_type = 'RADIO'
+                input_type = 'RADIO_BOOL'
                 question_text = question_text.next_element
 
             elif question_text[-1] == ' ':
@@ -69,13 +70,35 @@ def _analyze_question(feedback) -> {str, str}:
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Scraper0X')
+    parser.add_argument(
+        '-n',
+        '--examnumber',
+        required=False,
+        help='Parametro para decidir que examen ejecutar. Dejarlo vacio usa el default del config.ini',
+        default='0')
+    args = parser.parse_args()
+    logger.info('*************** PARAMETROS DE ENTRADA => '
+                f'--examnumber:{args.examnumber}'
+                ' ***************')
+
+    if args.examnumber == '0':
+        exam_number = config['DEFAULT']['exam_to_do']
+    else:
+        exam_number = args.examnumber
+    exam_section = f'EXAM{exam_number}'
+    quiz_url = config[exam_section]['quiz_url']
+    api_create = config[exam_section]['api_create']
+    x_api_key = config[exam_section]['x-api-key']
+
+    my_service = send.MyService(api_create, x_api_key)
+
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
     logger.info(f'v_uuid->{v_uuid}')
 
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
-    quiz_url = config['DEFAULT']['quiz_url']
     ew = 20  # explicit_wait
 
     # default is zero - don't activate this cause will  interfere with WebDriverWait
@@ -219,11 +242,14 @@ def main():
 
         correct_ticks = feedback.select('.circular-tick, .circular-tick-holo')
         for correct_option in correct_ticks:
-            f_correct_answer_text = correct_option.previous_sibling.div.div.next_sibling.div.next_element
+            if f_type == 'RADIO_BOOL':
+                f_correct_answer_text = correct_option.previous_sibling.next_element.next_element.next_element.next_element.next_element
+            else:
+                f_correct_answer_text = correct_option.previous_sibling.next_element.next_element.next_element.next_element.next_element.next_element
             print(f_correct_answer_text)
             logger.info(f_correct_answer_text)
-            send.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                        f_correct_answer_text, True, currentDT.isoformat())
+            my_service.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
+                              f_correct_answer_text, True, currentDT.isoformat())
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
