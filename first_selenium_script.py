@@ -44,7 +44,7 @@ def _analyze_question(feedback) -> {str, str}:
             contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
         input_type = 'RADIO'
     except Exception as e1:
-        logger.error(str(e1), exc_info=True)
+        logger.warning(str(e1), exc_info=True)
 
         try:
             question_text = (
