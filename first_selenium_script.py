@@ -52,7 +52,7 @@ def _analyze_question(feedback) -> {str, str}:
             input_type = 'CHECK'
 
             if question_text == 'True or False:':
-                input_type = 'RADIO'
+                input_type = 'RADIO_BOOL'
                 question_text = question_text.next_element
 
             elif question_text[-1] == ' ':
