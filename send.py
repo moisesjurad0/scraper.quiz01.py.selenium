@@ -10,7 +10,7 @@ class MyService:
         self.x_api_key = x_api_key
 
     # def create(v_id, v_uuid, question, question_type, answer, flag_correct):
-    def create(self, v_id, question, question_type, answer, flag_correct, last_modify):
+    def create(self, v_id, question, question_type, answer, flag_correct, exam_number, last_modify):
         payload = json.dumps({
             "id": v_id,
             # "uuid": v_uuid,
@@ -18,6 +18,7 @@ class MyService:
             "question_type": question_type,
             "answer": answer,
             "correct": flag_correct,
+            "exam_number": exam_number,
             "last_modify": last_modify
         })
         headers = {

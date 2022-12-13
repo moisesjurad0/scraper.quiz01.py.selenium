@@ -249,7 +249,7 @@ def main():
             print(f_correct_answer_text)
             logger.info(f_correct_answer_text)
             my_service.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                              f_correct_answer_text, True, currentDT.isoformat())
+                              f_correct_answer_text, True, exam_number, currentDT.isoformat())
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
