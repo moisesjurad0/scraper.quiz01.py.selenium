@@ -235,7 +235,7 @@ def main():
                             f_correct_answer_text, True, currentDT.isoformat())
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
-    driver.quit()  # browser.close()
+    driver.quit()  # driver.close()
 
 
 if __name__ == "__main__":
