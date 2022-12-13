@@ -99,6 +99,7 @@ def main():
 
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
+    headless = config.getboolean('DEFAULT', 'headless')
     ew = 20  # explicit_wait
 
     # default is zero - don't activate this cause will  interfere with WebDriverWait
@@ -112,7 +113,10 @@ def main():
     # log.info(userAgent)
     # opts_chrome.add_argument(f'user-agent={userAgent}')
     # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
-    # opts_chrome.add_argument("headless")
+
+    if headless:
+        options.add_argument("headless")
+
     options.add_argument("--start-fullscreen")  # or with --
     # options.add_argument("start-maximized")
     options.add_argument("--incognito")  # or without --
