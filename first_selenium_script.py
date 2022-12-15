@@ -18,7 +18,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-import send
+import my_service
 
 currentDT = datetime.datetime.now()
 logging.basicConfig(
@@ -31,6 +31,7 @@ logger.info('inicio')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+ew = 20  # ew stands for explicit_wait
 
 
 def _analyze_question(feedback) -> {str, str}:
@@ -69,6 +70,18 @@ def _analyze_question(feedback) -> {str, str}:
     return input_type, question_text
 
 
+def _mark_dom_answers(driver, scrapped_answers_to_choose):
+    for scrapped_answer in scrapped_answers_to_choose:
+        _roll_n_click_to_answer(driver, scrapped_answer)
+
+
+def _roll_n_click_to_answer(driver, scrapped_answer):
+    driver.execute_script("arguments[0].scrollIntoView(true);", scrapped_answer)
+    # browser.execute_script("arguments[0].click();", answer)
+    # answer.click()
+    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(scrapped_answer)).click()
+
+
 def main():
     parser = argparse.ArgumentParser(description='Scraper0X')
     parser.add_argument(
@@ -86,12 +99,14 @@ def main():
         exam_number = config['DEFAULT']['exam_to_do']
     else:
         exam_number = args.examnumber
+
     exam_section = f'EXAM-{exam_number}'
     quiz_url = config[exam_section]['quiz_url']
-    api_create = config[exam_section]['api_create']
     x_api_key = config[exam_section]['x-api-key']
+    api_put = config[exam_section]['api_put']
+    api_search = config[exam_section]['api_search']
 
-    my_service = send.MyService(api_create, x_api_key)
+    obj_service = my_service.MyService(x_api_key, api_put, api_search)
 
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
@@ -100,10 +115,7 @@ def main():
     driver_path = config['DEFAULT']['driver_path']
     brave_path = config['DEFAULT']['brave_path']
     headless = config.getboolean('DEFAULT', 'headless')
-    ew = 20  # explicit_wait
-
-    # default is zero - don't activate this cause will  interfere with WebDriverWait
-    # implicitly_wait = config.getint('DEFAULT', 'implicitly_wait')
+    do_correct_answers = config.getboolean('DEFAULT', 'do_correct_answers')
 
     service = Service(driver_path)
     options = Options()
@@ -112,11 +124,9 @@ def main():
     # userAgent = ua.random
     # log.info(userAgent)
     # opts_chrome.add_argument(f'user-agent={userAgent}')
-    # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
-
-    if headless:
-        options.add_argument("headless")
-
+    # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+    #                          '(KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
+    options.add_argument("headless") if headless else None
     options.add_argument("--start-fullscreen")  # or with --
     # options.add_argument("start-maximized")
     options.add_argument("--incognito")  # or without --
@@ -147,9 +157,7 @@ def main():
     WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
         (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]'))).click()
 
-    str_tmp = 'ANSWERING QUESTIONS WITH UNREAL DATA'
-    print(str_tmp)
-    logger.info(str_tmp)
+    logger.info('SECTION - ANSWERING QUESTIONS')
     while True:
         div_xpath = (
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
@@ -160,7 +168,9 @@ def main():
             logger.error(str(ex1), exc_info=True)
         finally:
             div_question_text = WebDriverWait(driver, ew).until(
-                EC.visibility_of_element_located((By.XPATH, div_xpath))).text
+                EC.visibility_of_element_located((By.XPATH, div_xpath))).text.split("\n")[0]
+            if div_question_text.startswith('True or False: '):
+                div_question_text = div_question_text.split('True or False: ')[1]
             print(div_question_text)
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located((By.XPATH, div_xpath)))
@@ -168,27 +178,39 @@ def main():
         # print(div_question.text)
 
         # CHECKBOXES or RADIO BUTTONS
-        a_block_of_answers = driver.find_elements(
+        scrapped_answers_to_choose = driver.find_elements(
             By.XPATH,
             '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
             ' | '
             '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
 
-        for answer in a_block_of_answers:
-            driver.execute_script("arguments[0].scrollIntoView(true);", answer)
-            # browser.execute_script("arguments[0].click();", answer)
-            # answer.click()
-            WebDriverWait(driver, ew).until(EC.element_to_be_clickable(answer)).click()
+        if do_correct_answers:
+            logger.info('SECTION - DO CORRECT ANSWERS')
+            stored_data = obj_service.search_v2(question=div_question_text, flag_correct=True)
+            if stored_data:
+                logger.info('ITEM - DATA FOUND')
+                for stored_item in stored_data:
+                    for scrapped_answer in scrapped_answers_to_choose:
+                        scrapped_answer_txt = scrapped_answer.find_element(By.CLASS_NAME, 'bbcode, cursor-pointer').text
+                        if stored_item['answer'] == scrapped_answer_txt:
+                            _roll_n_click_to_answer(driver, scrapped_answer)
+                            break
+            else:
+                logger.info('ITEM - DATA NOT FOUND')
+                _mark_dom_answers(driver, scrapped_answers_to_choose)
+
+        else:
+            logger.info('SECTION - DUMMY ANSWERS')
+            _mark_dom_answers(driver, scrapped_answers_to_choose)
 
         btn_css_selector = (
             'ion-button[data-cy="continue-btn"]'
             ','
             'ion-button[data-cy="finish-btn"]')
         WebDriverWait(driver, ew).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, btn_css_selector)))
-        btn_next_or_finish_now = driver.find_element(
-            By.CSS_SELECTOR,
-            btn_css_selector)
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, btn_css_selector)))
+        btn_next_or_finish_now = driver.find_element(By.CSS_SELECTOR, btn_css_selector)
 
         attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
 
@@ -203,9 +225,7 @@ def main():
             # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
             # time.sleep(2)
             # seccion del boton "Confirm finish now"
-            # btn_confirm_finish_now = driver.find_element(
-            #     By.XPATH,
-            #     '//*[@id="test_confirm_finish"]')
+            # btn_confirm_finish_now = driver.find_element(By.XPATH, '//*[@id="test_confirm_finish"]')
             # btn_confirm_finish_now.click()
             WebDriverWait(driver, ew).until(
                 EC.element_to_be_clickable((
@@ -213,18 +233,14 @@ def main():
                 )).click()
             break
 
-    str_tmp = 'HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA'
-    print(str_tmp)
-    logger.info(str_tmp)
+    logger.info('HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
 
     # WebDriverWait(driver, ew).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
     WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
     WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
     WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
 
-    str_tmp = 'SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE'
-    print(str_tmp)
-    logger.info(str_tmp)
+    logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
 
     page_source = driver.page_source
     soup = BeautifulSoup(page_source, 'html.parser')
@@ -247,13 +263,15 @@ def main():
         correct_ticks = feedback.select('.circular-tick, .circular-tick-holo')
         for correct_option in correct_ticks:
             if f_type == 'RADIO_BOOL':
-                f_correct_answer_text = correct_option.previous_sibling.next_element.next_element.next_element.next_element.next_element
+                f_correct_answer_text = (correct_option.previous_sibling.
+                                         next_element.next_element.next_element.next_element.next_element)
             else:
-                f_correct_answer_text = correct_option.previous_sibling.next_element.next_element.next_element.next_element.next_element.next_element
+                f_correct_answer_text = (correct_option.previous_sibling.
+                                         next_element.next_element.next_element.next_element.next_element.next_element)
             print(f_correct_answer_text)
             logger.info(f_correct_answer_text)
-            my_service.create(f'{f_question_text}---{f_correct_answer_text}', f_question_text, f_type,
-                              f_correct_answer_text, True, exam_number, currentDT.isoformat())
+            obj_service.put(f'{f_question_text}---{f_correct_answer_text}',
+                            f_question_text, f_type, f_correct_answer_text, True, exam_number, currentDT.isoformat())
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
