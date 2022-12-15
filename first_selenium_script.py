@@ -196,7 +196,7 @@ def main():
                             _roll_n_click_to_answer(driver, scrapped_answer)
                             break
             else:
-                logger.info('ITEM - DATA NOT FOUND')
+                logger.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
                 _mark_dom_answers(driver, scrapped_answers_to_choose)
 
         else:
