@@ -266,11 +266,11 @@ def main():
         correct_ticks = feedback.select('.circular-tick, .circular-tick-holo')
         for correct_option in correct_ticks:
             if f_type == 'RADIO_BOOL':
-                f_correct_answer_text = (correct_option.previous_sibling.
-                                         next_element.next_element.next_element.next_element.next_element)
+                f_correct_answer_text = (correct_option.previous_sibling.next_element.next_element.
+                                         next_element.next_element.next_element.text)
             else:
-                f_correct_answer_text = (correct_option.previous_sibling.
-                                         next_element.next_element.next_element.next_element.next_element.next_element)
+                f_correct_answer_text = (correct_option.previous_sibling.next_element.next_element.
+                                         next_element.next_element.next_element.next_element.text)
             print(f_correct_answer_text)
             logger.info(f_correct_answer_text)
             obj_service.put(f'{f_question_text}---{f_correct_answer_text}',
