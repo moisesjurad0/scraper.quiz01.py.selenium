@@ -39,38 +39,38 @@ config.read('config.ini')
 
 def _analyze_feedback_question(feedback) -> {str, str}:
     """Determinar el tipo de pregunta."""
-    input_type = ''
-    question_text = ''
+    str_input_type = ''
+    str_question = ''
 
     try:
-        question_text = (
+        str_question = (
             feedback.contents[0].contents[0].next_sibling.
-            contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
-        input_type = 'RADIO'
+            contents[0].contents[0].contents[0].contents[0].contents[0].next_element.text)
+        str_input_type = 'RADIO'
     except Exception as e1:
         logger.warning(str(e1), exc_info=True)
 
         try:
-            question_text = (
-                feedback.contents[0].contents[0].next_sibling.div.
-                contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
-            input_type = 'CHECK'
+            # we_question stands for WebElement Question
+            we_question = (feedback.contents[0].contents[0].next_sibling.div.
+                           contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+            str_input_type = 'CHECK'
 
-            if question_text == STR_TOFC:
-                input_type = 'RADIO_BOOL'
-                question_text = question_text.next_element.lstrip()
+            if we_question.text == STR_TOFC:
+                str_input_type = 'RADIO_BOOL'
+                str_question = we_question.next_element.text.lstrip()
 
-            elif question_text[-1] == ' ':
-                if str(question_text.next_element.next_element) == 'NOT':
-                    question_text = (
-                        f'{question_text}'
-                        f'{question_text.next_element.next_element}'
-                        f'{question_text.next_element.next_element.next_element}')
+            elif we_question.text[-1] == ' ':
+                if we_question.next_element.next_element.text == 'NOT':
+                    str_question = (
+                            we_question.text +
+                            we_question.next_element.next_element.text +
+                            we_question.next_element.next_element.next_element.text)
 
         except Exception as e2:
             logger.error(str(e2), exc_info=True)
 
-    return input_type, question_text
+    return str_input_type, str_question
 
 
 def _mark_dom_answers(driver, scrapped_answers_to_choose):
