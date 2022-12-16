@@ -20,6 +20,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import my_service
 
+STR_TOFC = 'True or False:'
+STR_TOFCS = 'True or False: '
+
 currentDT = datetime.datetime.now()
 logging.basicConfig(
     filename=f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
@@ -34,7 +37,7 @@ config.read('config.ini')
 ew = 20  # ew stands for explicit_wait
 
 
-def _analyze_question(feedback) -> {str, str}:
+def _analyze_feedback_question(feedback) -> {str, str}:
     """Determinar el tipo de pregunta."""
     input_type = ''
     question_text = ''
@@ -53,9 +56,9 @@ def _analyze_question(feedback) -> {str, str}:
                 contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
             input_type = 'CHECK'
 
-            if question_text == 'True or False:':
+            if question_text == STR_TOFC:
                 input_type = 'RADIO_BOOL'
-                question_text = question_text.next_element
+                question_text = question_text.next_element.lstrip()
 
             elif question_text[-1] == ' ':
                 if str(question_text.next_element.next_element) == 'NOT':
@@ -169,8 +172,8 @@ def main():
         finally:
             div_question_text = WebDriverWait(driver, ew).until(
                 EC.visibility_of_element_located((By.XPATH, div_xpath))).text.split("\n")[0]
-            if div_question_text.startswith('True or False: '):
-                div_question_text = div_question_text.split('True or False: ')[1]
+            if div_question_text.startswith(STR_TOFCS):
+                div_question_text = div_question_text.split(STR_TOFCS)[1]
             print(div_question_text)
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located((By.XPATH, div_xpath)))
@@ -255,7 +258,7 @@ def main():
         # print('-------------------------------------')
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
-        f_type, f_question_text = _analyze_question(feedback)
+        f_type, f_question_text = _analyze_feedback_question(feedback)
 
         print(f'Q{contador_preguntas} - {f_question_text}')
         logger.info(f'Q{contador_preguntas} - {f_question_text}')
