@@ -22,6 +22,7 @@ import my_service
 
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
+EW = 20  # EW stands for explicit_wait
 
 currentDT = datetime.datetime.now()
 logging.basicConfig(
@@ -34,7 +35,6 @@ logger.info('inicio')
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-ew = 20  # ew stands for explicit_wait
 
 
 def _analyze_feedback_question(feedback) -> {str, str}:
@@ -82,7 +82,7 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
     driver.execute_script("arguments[0].scrollIntoView(true);", scrapped_answer)
     # browser.execute_script("arguments[0].click();", answer)
     # answer.click()
-    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(scrapped_answer)).click()
+    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(scrapped_answer)).click()
 
 
 def main():
@@ -153,11 +153,11 @@ def main():
     # driver.implicitly_wait(implicitly_wait)
 
     # press 1st button Next
-    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
         (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button'))).click()
 
     # press 2nd button Next
-    WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
         (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]'))).click()
 
     logger.info('SECTION - ANSWERING QUESTIONS')
@@ -170,7 +170,7 @@ def main():
         except Exception as ex1:
             logger.error(str(ex1), exc_info=True)
         finally:
-            div_question_text = WebDriverWait(driver, ew).until(
+            div_question_text = WebDriverWait(driver, EW).until(
                 EC.visibility_of_element_located((By.XPATH, div_xpath))).text.split("\n")[0]
             if div_question_text.startswith(STR_TOFCS):
                 div_question_text = div_question_text.split(STR_TOFCS)[1]
@@ -210,7 +210,7 @@ def main():
             'ion-button[data-cy="continue-btn"]'
             ','
             'ion-button[data-cy="finish-btn"]')
-        WebDriverWait(driver, ew).until(
+        WebDriverWait(driver, EW).until(
             EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, btn_css_selector)))
         btn_next_or_finish_now = driver.find_element(By.CSS_SELECTOR, btn_css_selector)
@@ -230,7 +230,7 @@ def main():
             # seccion del boton "Confirm finish now"
             # btn_confirm_finish_now = driver.find_element(By.XPATH, '//*[@id="test_confirm_finish"]')
             # btn_confirm_finish_now.click()
-            WebDriverWait(driver, ew).until(
+            WebDriverWait(driver, EW).until(
                 EC.element_to_be_clickable((
                     By.XPATH, '//*[@id="test_confirm_finish"]')
                 )).click()
@@ -239,9 +239,9 @@ def main():
     logger.info('HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
 
     # WebDriverWait(driver, ew).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
-    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
-    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
-    WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
 
     logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
 
