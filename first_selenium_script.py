@@ -131,8 +131,12 @@ def main():
     # opts_chrome.add_argument(f'user-agent={userAgent}')
     # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
     #                          '(KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
-    options.add_argument("headless") if headless else None
-    options.add_argument("--start-fullscreen")  # or with --
+    if headless:
+        options.add_argument("--headless")
+        options.add_argument("--start-maximized")
+        options.add_argument("--window-size=1920,1080")
+    else:
+        options.add_argument("--start-fullscreen")  # or with --
     # options.add_argument("start-maximized")
     options.add_argument("--incognito")  # or without --
     # options.add_argument("--disable-infobars") #not working on latest versions of driver
