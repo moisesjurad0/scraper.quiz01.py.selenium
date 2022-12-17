@@ -9,6 +9,7 @@ import datetime
 import logging
 import sys
 import uuid
+from pathlib import Path
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -23,10 +24,14 @@ import my_service
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
 EW = 20  # EW stands for explicit_wait
+script_path = Path(__file__).absolute()
+script_dir = Path(__file__).parent.absolute()
+log_folder = script_dir / 'logs'
+log_folder.mkdir(parents=True, exist_ok=True)
 
 currentDT = datetime.datetime.now()
 logging.basicConfig(
-    filename=f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
+    filename=log_folder / f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
     level=logging.INFO,
     format='%(asctime)s | %(name)s | %(levelname)s | [%(filename)s:%(lineno)d] | %(message)s')
 logger = logging.getLogger('scrapping01')
