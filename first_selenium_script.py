@@ -66,6 +66,8 @@ def _analyze_feedback_question(feedback) -> {str, str}:
                             we_question.text +
                             we_question.next_element.next_element.text +
                             we_question.next_element.next_element.next_element.text)
+            else:
+                str_question = we_question.text
 
         except Exception as e2:
             logger.error(str(e2), exc_info=True)
@@ -266,15 +268,15 @@ def main():
         correct_ticks = feedback.select('.circular-tick, .circular-tick-holo')
         for correct_option in correct_ticks:
             if f_type == 'RADIO_BOOL':
-                f_correct_answer_text = (correct_option.previous_sibling.next_element.next_element.
-                                         next_element.next_element.next_element.text)
+                f_answer_ok_text = (correct_option.previous_sibling.next_element.next_element.
+                                    next_element.next_element.next_element.text)
             else:
-                f_correct_answer_text = (correct_option.previous_sibling.next_element.next_element.
-                                         next_element.next_element.next_element.next_element.text)
-            print(f_correct_answer_text)
-            logger.info(f_correct_answer_text)
-            obj_service.put(f'{f_question_text}---{f_correct_answer_text}',
-                            f_question_text, f_type, f_correct_answer_text, True, exam_number, currentDT.isoformat())
+                f_answer_ok_text = (correct_option.previous_sibling.next_element.next_element.
+                                    next_element.next_element.next_element.next_element.text)
+            print(f_answer_ok_text)
+            logger.info(f_answer_ok_text)
+            obj_service.put(f'{f_question_text}---{f_answer_ok_text}',
+                            f_question_text, f_type, f_answer_ok_text, True, exam_number, currentDT.isoformat())
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
