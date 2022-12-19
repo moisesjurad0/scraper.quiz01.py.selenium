@@ -23,6 +23,9 @@ import my_service
 
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
+RADIO = 'RADIO'
+CHECK = 'CHECK'
+RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
 script_path = Path(__file__).absolute()
 script_dir = Path(__file__).parent.absolute()
@@ -51,7 +54,7 @@ def _analyze_feedback_question(feedback) -> {str, str}:
         str_question = (
             feedback.contents[0].contents[0].next_sibling.
             contents[0].contents[0].contents[0].contents[0].contents[0].next_element.text)
-        str_input_type = 'RADIO'
+        str_input_type = RADIO
     except Exception as e1:
         logger.warning(str(e1), exc_info=True)
 
@@ -59,10 +62,10 @@ def _analyze_feedback_question(feedback) -> {str, str}:
             # we_question stands for WebElement Question
             we_question = (feedback.contents[0].contents[0].next_sibling.div.
                            contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
-            str_input_type = 'CHECK'
+            str_input_type = CHECK
 
             if we_question.text == STR_TOFC:
-                str_input_type = 'RADIO_BOOL'
+                str_input_type = RADIO_BOOL
                 str_question = we_question.next_element.text.lstrip()
 
             elif we_question.text[-1] == ' ':
@@ -90,6 +93,20 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
     # browser.execute_script("arguments[0].click();", answer)
     # answer.click()
     WebDriverWait(driver, EW).until(EC.element_to_be_clickable(scrapped_answer)).click()
+
+
+def _process_feeback_ticks(ticks, exam_number, f_question_text, f_type, flag_correct, obj_service):
+    for tick in ticks:
+        if f_type == RADIO_BOOL:
+            f_answer_ok_text = (tick.previous_sibling.next_element.next_element.
+                                next_element.next_element.next_element.text)
+        else:
+            f_answer_ok_text = (tick.previous_sibling.next_element.next_element.
+                                next_element.next_element.next_element.next_element.text)
+        print(f_answer_ok_text)
+        logger.info(f_answer_ok_text)
+        obj_service.put(f'{f_question_text}---{f_answer_ok_text}',
+                        f_question_text, f_type, f_answer_ok_text, flag_correct, exam_number, currentDT.isoformat())
 
 
 def main():
@@ -191,7 +208,7 @@ def main():
         # div_question = WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, div_xpath)))
         # print(div_question.text)
 
-        # CHECKBOXES or RADIO BUTTONS
+        # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
         scrapped_answers_to_choose = driver.find_elements(
             By.XPATH,
             '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
@@ -264,28 +281,26 @@ def main():
     for feedback in feedbacks:
         contador_preguntas += 1
         print(feedback.text)
-        # logger.info(feedback.text)
-        # just to separate the feedbacks
-        # print('-------------------------------------')
-        # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')  # 'circular-x'
 
         f_type, f_question_text = _analyze_feedback_question(feedback)
 
         print(f'Q{contador_preguntas} - {f_question_text}')
         logger.info(f'Q{contador_preguntas} - {f_question_text}')
 
-        correct_ticks = feedback.select('.circular-tick, .circular-tick-holo')
-        for correct_option in correct_ticks:
-            if f_type == 'RADIO_BOOL':
-                f_answer_ok_text = (correct_option.previous_sibling.next_element.next_element.
-                                    next_element.next_element.next_element.text)
-            else:
-                f_answer_ok_text = (correct_option.previous_sibling.next_element.next_element.
-                                    next_element.next_element.next_element.next_element.text)
-            print(f_answer_ok_text)
-            logger.info(f_answer_ok_text)
-            obj_service.put(f'{f_question_text}---{f_answer_ok_text}',
-                            f_question_text, f_type, f_answer_ok_text, True, exam_number, currentDT.isoformat())
+        correct_ticks = feedback.select(
+            '.circular-tick, .circular-tick-holo')
+        _process_feeback_ticks(correct_ticks, exam_number, f_question_text, f_type, True, obj_service)
+        # OTRAS MANERAS DE INVOCAR EL SELECTOR
+        # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')
+
+        incorrect_ticks = feedback.select(
+            'ion-icon[class="icon icon-correct md hydrated"]:not(.circular-tick-holo,.circular-tick)')  # v4
+        _process_feeback_ticks(incorrect_ticks, exam_number, f_question_text, f_type, False, obj_service)
+        # OTRAS MANERAS DE INVOCAR EL SELECTOR
+        # v0#'circular-x' #para los incorrectos
+        # v1#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
+        # v2#feedback.select('ion-icon:not(.circular-tick-holo,.circular-tick)')
+        # v3#feedback.select('ion-icon[class="icon icon-correct md hydrated"]').select('ion-icon:not(.circular-tick-holo,.circular-tick)')
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
