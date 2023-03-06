@@ -139,14 +139,14 @@ def main():
     print(f'v_uuid->{v_uuid}')
     logger.info(f'v_uuid->{v_uuid}')
 
-    driver_path = config['DEFAULT']['driver_path']
-    brave_path = config['DEFAULT']['brave_path']
+    driver_location = config['DEFAULT']['driver_location ']
+    binary_location = config['DEFAULT']['binary_location ']
     headless = config.getboolean('DEFAULT', 'headless')
     do_correct_answers = config.getboolean('DEFAULT', 'do_correct_answers')
 
-    service = Service(driver_path)
+    service = Service(driver_location)
     options = Options()
-    options.binary_location = brave_path
+    options.binary_location = binary_location
     # ua = UserAgent()
     # userAgent = ua.random
     # log.info(userAgent)
