@@ -138,8 +138,8 @@ def main():
     print(f'v_uuid->{v_uuid}')
     logger.info(f'v_uuid->{v_uuid}')
 
-    driver_location = config['DEFAULT']['driver_location ']
-    binary_location = config['DEFAULT']['binary_location ']
+    driver_location = config['DEFAULT']['driver_location']
+    binary_location = config['DEFAULT']['binary_location']
     headless = config.getboolean('DEFAULT', 'headless')
     do_correct_answers = config.getboolean('DEFAULT', 'do_correct_answers')
 
