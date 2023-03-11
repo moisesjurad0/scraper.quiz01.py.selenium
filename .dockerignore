@@ -4,5 +4,7 @@ __pycache__
 logs
 venv
 .env
+.git
+*.exe
 # valores opcionales de prueba
 test.py
