@@ -112,22 +112,19 @@ def _process_feeback_ticks(ticks, exam_number, f_question_text, f_type, flag_cor
 
 
 def main():
+    """Main method."""
     parser = argparse.ArgumentParser(description='Scraper0X')
     parser.add_argument(
         '-n',
         '--examnumber',
         required=False,
         help='Parametro para decidir que examen ejecutar. Dejarlo vacio usa el default del config.ini',
-        default='0')
+        default='1')
     args = parser.parse_args()
     logger.info('*************** PARAMETROS DE ENTRADA => '
                 f'--examnumber:{args.examnumber}'
                 ' ***************')
-
-    if args.examnumber == '0':
-        exam_number = config['DEFAULT']['exam_to_do']
-    else:
-        exam_number = args.examnumber
+    exam_number = args.examnumber
 
     exam_section = f'EXAM-{exam_number}'
     quiz_url = config[exam_section]['quiz_url']
