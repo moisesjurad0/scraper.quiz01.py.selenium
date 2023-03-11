@@ -4,3 +4,5 @@ __pycache__
 logs
 venv
 .env
+# valores opcionales de prueba
+test.py
