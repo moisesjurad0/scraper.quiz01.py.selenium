@@ -71,9 +71,9 @@ def _analyze_feedback_question(feedback) -> {str, str}:
             elif we_question.text[-1] == ' ':
                 if we_question.next_element.next_element.text == 'NOT':
                     str_question = (
-                            we_question.text +
-                            we_question.next_element.next_element.text +
-                            we_question.next_element.next_element.next_element.text)
+                        we_question.text +
+                        we_question.next_element.next_element.text +
+                        we_question.next_element.next_element.next_element.text)
             else:
                 str_question = we_question.text
 
@@ -89,10 +89,12 @@ def _mark_dom_answers(driver, scrapped_answers_to_choose):
 
 
 def _roll_n_click_to_answer(driver, scrapped_answer):
-    driver.execute_script("arguments[0].scrollIntoView(true);", scrapped_answer)
+    driver.execute_script(
+        "arguments[0].scrollIntoView(true);", scrapped_answer)
     # browser.execute_script("arguments[0].click();", answer)
     # answer.click()
-    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(scrapped_answer)).click()
+    WebDriverWait(driver, EW).until(
+        EC.element_to_be_clickable(scrapped_answer)).click()
 
 
 def _process_feeback_ticks(ticks, exam_number, f_question_text, f_type, flag_correct, obj_service):
@@ -194,7 +196,8 @@ def main():
             '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
             'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
         try:
-            WebDriverWait(driver, 3).until_not(EC.visibility_of_element_located((By.XPATH, div_xpath)))
+            WebDriverWait(driver, 3).until_not(
+                EC.visibility_of_element_located((By.XPATH, div_xpath)))
         except Exception as ex1:
             logger.error(str(ex1), exc_info=True)
         finally:
@@ -217,12 +220,14 @@ def main():
 
         if do_correct_answers:
             logger.info('SECTION - DO CORRECT ANSWERS')
-            stored_data = obj_service.search_v2(question=div_question_text, flag_correct=True)
+            stored_data = obj_service.search_v2(
+                question=div_question_text, flag_correct=True)
             if stored_data:
                 logger.info('ITEM - DATA FOUND')
                 for stored_item in stored_data:
                     for scrapped_answer in scrapped_answers_to_choose:
-                        scrapped_answer_txt = scrapped_answer.find_element(By.CLASS_NAME, 'bbcode, cursor-pointer').text
+                        scrapped_answer_txt = scrapped_answer.find_element(
+                            By.CLASS_NAME, 'bbcode, cursor-pointer').text
                         if stored_item['answer'] == scrapped_answer_txt:
                             _roll_n_click_to_answer(driver, scrapped_answer)
                             break
@@ -241,7 +246,8 @@ def main():
         WebDriverWait(driver, EW).until(
             EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, btn_css_selector)))
-        btn_next_or_finish_now = driver.find_element(By.CSS_SELECTOR, btn_css_selector)
+        btn_next_or_finish_now = driver.find_element(
+            By.CSS_SELECTOR, btn_css_selector)
 
         attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
 
@@ -264,12 +270,16 @@ def main():
                 )).click()
             break
 
-    logger.info('HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
+    logger.info(
+        'HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
 
     # WebDriverWait(driver, ew).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
-    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[1]')))
-    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/ion-card[2]')))
-    WebDriverWait(driver, EW).until(EC.presence_of_element_located((By.XPATH, '//*[@id="contents"]/div')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="contents"]/ion-card[1]')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="contents"]/ion-card[2]')))
+    WebDriverWait(driver, EW).until(EC.presence_of_element_located(
+        (By.XPATH, '//*[@id="contents"]/div')))
 
     logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
 
@@ -289,13 +299,15 @@ def main():
 
         correct_ticks = feedback.select(
             '.circular-tick, .circular-tick-holo')
-        _process_feeback_ticks(correct_ticks, exam_number, f_question_text, f_type, True, obj_service)
+        _process_feeback_ticks(correct_ticks, exam_number,
+                               f_question_text, f_type, True, obj_service)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
         # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')
 
         incorrect_ticks = feedback.select(
             'ion-icon[class="icon icon-correct md hydrated"]:not(.circular-tick-holo,.circular-tick)')  # v4
-        _process_feeback_ticks(incorrect_ticks, exam_number, f_question_text, f_type, False, obj_service)
+        _process_feeback_ticks(incorrect_ticks, exam_number,
+                               f_question_text, f_type, False, obj_service)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
         # v0#'circular-x' #para los incorrectos
         # v1#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
