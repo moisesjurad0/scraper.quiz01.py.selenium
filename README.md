@@ -14,5 +14,5 @@ Build to be deployed on docker :thumbsup:
 - AWS API
   - AWS Lambda
   - AWS Dynammo
+  - AWS SAM
   - BOTO3
-  - SAM
