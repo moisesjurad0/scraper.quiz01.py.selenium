@@ -1,7 +1,7 @@
 FROM selenium/standalone-chrome
 
-WORKDIR /usr/src/myapp
-COPY requirements.txt .
+WORKDIR /myapp
+COPY . .
 
 USER root
 RUN apt-get update && apt-get install python3-distutils -y
