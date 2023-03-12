@@ -5,6 +5,7 @@ logs
 venv
 .env
 .git
-*.exe
+chromedriver.exe
+LICENSE.chromedriver
 # valores opcionales de prueba
 test.py
