@@ -1,4 +1,6 @@
 FROM selenium/standalone-chrome
+#FROM selenium/standalone-chrome:latest
+#FROM selenium/standalone-chrome:4.8.1-20230306
 
 WORKDIR /myapp
 COPY . .
