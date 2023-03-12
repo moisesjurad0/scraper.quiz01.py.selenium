@@ -184,8 +184,10 @@ def main():
     # userAgent = ua.random
     # log.info(userAgent)
     # opts_chrome.add_argument(f'user-agent={userAgent}')
-    # opts_chrome.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    #                          '(KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36')
+    # opts_chrome.add_argument(
+    #     'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+    #     'AppleWebKit/537.36 (KHTML, like Gecko) '
+    #     'Chrome/80.0.3987.149 Safari/537.36')
     if headless:
         options.add_argument("--headless")
         options.add_argument("--start-maximized")
@@ -214,7 +216,8 @@ def main():
     # codigo para probar si tenemos lxml antes de empezar
     # soup = BeautifulSoup(page_source, 'lxml')
 
-    # default is zero - don't activate this cause will  interfere with WebDriverWait
+    # don't activate this cause will interfere with WebDriverWait
+    # default is zero
     # driver.implicitly_wait(implicitly_wait)
 
     # press 1st button Next
@@ -226,13 +229,15 @@ def main():
     # press 2nd button Next
     WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
         (By.XPATH,
-         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
+         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button'
+         '[2]')
     )).click()
 
     logger.info('SECTION - ANSWERING QUESTIONS')
     while True:
         div_xpath = (
-            '/html/body/div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
+            '/html/body/'
+            'div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
             'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
         try:
             WebDriverWait(driver, 3).until_not(
@@ -241,21 +246,27 @@ def main():
             logger.error(str(ex1), exc_info=True)
         finally:
             div_question_text = WebDriverWait(driver, EW).until(
-                EC.visibility_of_element_located((By.XPATH, div_xpath))).text.split("\n")[0]
+                EC.visibility_of_element_located(
+                    (By.XPATH, div_xpath)
+                )).text.split("\n")[0]
             if div_question_text.startswith(STR_TOFCS):
                 div_question_text = div_question_text.split(STR_TOFCS)[1]
             print(div_question_text)
 
-        # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located((By.XPATH, div_xpath)))
-        # div_question = WebDriverWait(driver, ew).until(EC.presence_of_element_located((By.XPATH, div_xpath)))
+        # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located(
+            # (By.XPATH, div_xpath)))
+        # div_question = WebDriverWait(driver, ew).until(
+            # EC.presence_of_element_located((By.XPATH, div_xpath)))
         # print(div_question.text)
 
         # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
         scrapped_answers_to_choose = driver.find_elements(
             By.XPATH,
-            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-item'
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
+            'ion-list/ion-item'
             ' | '
-            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/ion-list/ion-radio-group/ion-item')
+            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
+            'ion-list/ion-radio-group/ion-item')
 
         if do_correct_answers:
             logger.info('SECTION - DO CORRECT ANSWERS')
@@ -292,16 +303,22 @@ def main():
 
         if attribute_data_cy == 'continue-btn':
             btn_next_or_finish_now.click()
-            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
-            # time.sleep(2)  # Este se encarga de waitear a la pregunta, de arriba que es donde se cae
+            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+            #   btn_next_or_finish_now)).click()
+
+            # Este se encarga de waitear a la pregunta,
+            # de arriba que es donde se cae
+            # time.sleep(2)
         elif attribute_data_cy == 'finish-btn':
             # seccion del boton "Confirm finish"
             # time.sleep(2)
             btn_next_or_finish_now.click()
-            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(btn_next_or_finish_now)).click()
+            # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+            #   btn_next_or_finish_now)).click()
             # time.sleep(2)
             # seccion del boton "Confirm finish now"
-            # btn_confirm_finish_now = driver.find_element(By.XPATH, '//*[@id="test_confirm_finish"]')
+            # btn_confirm_finish_now = driver.find_element(
+            #   By.XPATH, '//*[@id="test_confirm_finish"]')
             # btn_confirm_finish_now.click()
             WebDriverWait(driver, EW).until(
                 EC.element_to_be_clickable((
@@ -310,9 +327,11 @@ def main():
             break
 
     logger.info(
-        'HACER UN WAIT DE LA PAGINA DE RESULTADO, DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
+        'HACER UN WAIT DE LA PAGINA DE RESULTADO, '
+        'DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
 
-    # WebDriverWait(driver, ew).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="logo-area"]/div/div/img')))
+    # WebDriverWait(driver, ew).until(EC.element_to_be_clickable(
+    #   (By.XPATH, '//*[@id="logo-area"]/div/div/img')))
     WebDriverWait(driver, EW).until(EC.presence_of_element_located(
         (By.XPATH, '//*[@id="contents"]/ion-card[1]')))
     WebDriverWait(driver, EW).until(EC.presence_of_element_located(
@@ -341,17 +360,20 @@ def main():
         _process_feeback_ticks(correct_ticks, exam_number,
                                f_question_text, f_type, True, obj_service)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
-        # correctos = feedback.find_all_next('ion-icon', class_='circular-tick-holo')
+        # correctos = feedback.find_all_next(
+        #      'ion-icon', class_='circular-tick-holo')
 
         incorrect_ticks = feedback.select(
-            'ion-icon[class="icon icon-correct md hydrated"]:not(.circular-tick-holo,.circular-tick)')  # v4
+            'ion-icon[class="icon icon-correct md hydrated"]'
+            ':not(.circular-tick-holo,.circular-tick)')  # v4
         _process_feeback_ticks(incorrect_ticks, exam_number,
                                f_question_text, f_type, False, obj_service)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
         # v0#'circular-x' #para los incorrectos
         # v1#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
         # v2#feedback.select('ion-icon:not(.circular-tick-holo,.circular-tick)')
-        # v3#feedback.select('ion-icon[class="icon icon-correct md hydrated"]').select('ion-icon:not(.circular-tick-holo,.circular-tick)')
+        # v3#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
+        #   .select('ion-icon:not(.circular-tick-holo,.circular-tick)')
 
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
