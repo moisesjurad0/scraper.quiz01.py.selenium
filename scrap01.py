@@ -5,6 +5,7 @@ Returns:
 """
 import argparse
 import configparser
+import os
 import datetime
 import logging
 import sys
@@ -33,35 +34,61 @@ log_folder = script_dir / 'logs'
 log_folder.mkdir(parents=True, exist_ok=True)
 
 currentDT = datetime.datetime.now()
+
 logging.basicConfig(
     filename=log_folder / f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
     level=logging.INFO,
-    format='%(asctime)s | %(name)s | %(levelname)s | [%(filename)s:%(lineno)d] | %(message)s')
+    format=('%(asctime)s | %(name)s | %(levelname)s |'
+            ' [%(filename)s:%(lineno)d] | %(message)s'))
+
 logger = logging.getLogger('scrapping01')
 logger.setLevel(logging.INFO)
 logger.info('inicio')
 
-config = configparser.ConfigParser()
+# https://stackoverflow.com/questions/26586801/configparser-and-string-interpolation-with-env-variable
+
+
+class EnvInterpolation(configparser.BasicInterpolation):
+    """Interpolation which expands environment variables in values."""
+
+    def before_get(self, parser, section, option, value, defaults):
+        """Funcion de sobreEscritura."""
+        value = super().before_get(parser, section, option, value, defaults)
+        return os.path.expandvars(value)
+
+
+config = configparser.ConfigParser(interpolation=EnvInterpolation())
+# config = configparser.ConfigParser()
+# config = configparser.ConfigParser(os.environ)
+# config = configparser.ConfigParser(
+#     os.environ,
+#     interpolation=configparser.ExtendedInterpolation())
+# config = configparser.SafeConfigParser(os.environ)
 config.read('config.ini')
 
 
-def _analyze_feedback_question(feedback) -> {str, str}:
+def _analyze_feedback_question(feedback) -> set():
     """Determinar el tipo de pregunta."""
     str_input_type = ''
     str_question = ''
 
     try:
         str_question = (
-            feedback.contents[0].contents[0].next_sibling.
-            contents[0].contents[0].contents[0].contents[0].contents[0].next_element.text)
+            feedback.
+            contents[0].contents[0].next_sibling.
+            contents[0].contents[0].contents[0].
+            contents[0].contents[0].next_element.text)
         str_input_type = RADIO
     except Exception as e1:
         logger.warning(str(e1), exc_info=True)
 
         try:
             # we_question stands for WebElement Question
-            we_question = (feedback.contents[0].contents[0].next_sibling.div.
-                           contents[0].contents[0].contents[0].contents[0].contents[0].next_element)
+            we_question = (
+                feedback.
+                contents[0].contents[0].next_sibling.div.
+                contents[0].contents[0].contents[0].contents[0].contents[0].
+                next_element)
             str_input_type = CHECK
 
             if we_question.text == STR_TOFC:
@@ -73,7 +100,8 @@ def _analyze_feedback_question(feedback) -> {str, str}:
                     str_question = (
                         we_question.text +
                         we_question.next_element.next_element.text +
-                        we_question.next_element.next_element.next_element.text)
+                        we_question.next_element.next_element.next_element.
+                        text)
             else:
                 str_question = we_question.text
 
@@ -97,18 +125,23 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
         EC.element_to_be_clickable(scrapped_answer)).click()
 
 
-def _process_feeback_ticks(ticks, exam_number, f_question_text, f_type, flag_correct, obj_service):
+def _process_feeback_ticks(ticks, exam_number, f_question_text,
+                           f_type, flag_correct, obj_service):
     for tick in ticks:
         if f_type == RADIO_BOOL:
-            f_answer_ok_text = (tick.previous_sibling.next_element.next_element.
-                                next_element.next_element.next_element.text)
+            f_answer_ok_text = (
+                tick.previous_sibling.next_element.next_element.
+                next_element.next_element.next_element.text)
         else:
-            f_answer_ok_text = (tick.previous_sibling.next_element.next_element.
-                                next_element.next_element.next_element.next_element.text)
+            f_answer_ok_text = (
+                tick.previous_sibling.next_element.next_element.
+                next_element.next_element.next_element.next_element.text)
         print(f_answer_ok_text)
         logger.info(f_answer_ok_text)
-        obj_service.put(f'{f_question_text}---{f_answer_ok_text}',
-                        f_question_text, f_type, f_answer_ok_text, flag_correct, exam_number, currentDT.isoformat())
+        obj_service.put(
+            f'{f_question_text}---{f_answer_ok_text}',
+            f_question_text, f_type, f_answer_ok_text,
+            flag_correct, exam_number, currentDT.isoformat())
 
 
 def main():
