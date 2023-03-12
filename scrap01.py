@@ -151,7 +151,8 @@ def main():
         '-n',
         '--examnumber',
         required=False,
-        help='Parametro para decidir que examen ejecutar. Dejarlo vacio usa el default del config.ini',
+        help=('Parametro para decidir que examen ejecutar. '
+              'Dejarlo vacio usa el default del config.ini'),
         default='1')
     args = parser.parse_args()
     logger.info('*************** PARAMETROS DE ENTRADA => '
@@ -193,7 +194,9 @@ def main():
         options.add_argument("--start-fullscreen")  # or with --
     # options.add_argument("start-maximized")
     options.add_argument("--incognito")  # or without --
-    # options.add_argument("--disable-infobars") #not working on latest versions of driver
+
+    # not working on latest versions of driver
+    # options.add_argument("--disable-infobars")
     # options.add_argument("--disable-extensions")
     options.add_argument("allow-insecure-localhost")
     options.add_argument("ignore-ssl-errors=yes")
@@ -207,18 +210,24 @@ def main():
     driver.get(quiz_url)
 
     # page_source = driver.page_source
-    # soup = BeautifulSoup(page_source, 'lxml')  # codigo para probar si tenemos lxml antes de empezar
+
+    # codigo para probar si tenemos lxml antes de empezar
+    # soup = BeautifulSoup(page_source, 'lxml')
 
     # default is zero - don't activate this cause will  interfere with WebDriverWait
     # driver.implicitly_wait(implicitly_wait)
 
     # press 1st button Next
     WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
-        (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button'))).click()
+        (By.XPATH,
+         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
+    )).click()
 
     # press 2nd button Next
     WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
-        (By.XPATH, '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]'))).click()
+        (By.XPATH,
+         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
+    )).click()
 
     logger.info('SECTION - ANSWERING QUESTIONS')
     while True:
