@@ -9,3 +9,6 @@ chromedriver.exe
 LICENSE.chromedriver
 # valores opcionales de prueba
 test.py
+Dockerfile
+Dockerfile.*
+requirements2.txt

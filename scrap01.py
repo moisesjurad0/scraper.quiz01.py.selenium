@@ -190,8 +190,9 @@ def main():
     #     'Chrome/80.0.3987.149 Safari/537.36')
     if headless:
         options.add_argument("--headless")
-        options.add_argument("--start-maximized")
-        options.add_argument("--window-size=1920,1080")
+        # options.add_argument("--start-maximized")
+        # options.add_argument("--window-size=1920,1080")
+        options.add_argument('--no-sandbox')
     else:
         options.add_argument("--start-fullscreen")  # or with --
     # options.add_argument("start-maximized")

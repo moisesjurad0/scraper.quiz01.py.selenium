@@ -1,4 +1,4 @@
-bs4
-selenium
-requests
+beautifulsoup4==4.11.2 # bs4
+selenium==4.8.2
+requests==2.27.1
 #lxml

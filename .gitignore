@@ -6,3 +6,4 @@ venv
 .env
 chromedriver.exe
 LICENSE.chromedriver
+requirements2.txt
