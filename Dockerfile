@@ -1,18 +1,20 @@
-### https://hub.docker.com/r/joyzoursky/python-chromedriver/
-FROM joyzoursky/python-chromedriver:3.9-alpine-selenium
+# https://hub.docker.com/r/joyzoursky/python-chromedriver/
+## https://github.com/joyzoursky/docker-python-chromedriver/blob/master/py-alpine/3.9-alpine-selenium/Dockerfile
+FROM python:3.9-alpine
 
-### https://github.com/joyzoursky/docker-python-chromedriver/blob/master/py-alpine/3.9-alpine-selenium/Dockerfile
-# FROM python:3.9-alpine
-# # update apk repo
-# RUN echo "http://dl-4.alpinelinux.org/alpine/v3.14/main" >> /etc/apk/repositories && \
-#     echo "http://dl-4.alpinelinux.org/alpine/v3.14/community" >> /etc/apk/repositories
-# # install chromedriver
-# RUN apk update
-# RUN apk add chromium chromium-chromedriver
-# # upgrade pip
-# RUN pip install --upgrade pip
-# # install selenium
-# RUN pip install selenium
+# update apk repo
+RUN echo "http://dl-4.alpinelinux.org/alpine/v3.14/main" >> /etc/apk/repositories && \
+    echo "http://dl-4.alpinelinux.org/alpine/v3.14/community" >> /etc/apk/repositories
+
+# install chromedriver
+RUN apk update
+RUN apk add chromium chromium-chromedriver
+
+# upgrade pip
+RUN pip install --upgrade pip
+
+# install selenium
+RUN pip install selenium
 
 WORKDIR /myapp
 COPY . .
