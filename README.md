@@ -1,12 +1,12 @@
-# selenium-scrap01
+# quiz01-scrapper
 
-Python proyect designed to interact and scrap data out of a quizzes web site
-Build to be deployed on docker :thumbsup:
+Python proyect designed to interact with and scrap data out of a quizzes web site.
+Build to be deployed on docker :thumbsup::whale:
 
-## It is builded with
+## Python script is builded with
 
 - selenium
-- bs4
+- beautifulsoup4 (bs4)
 - requests
 
 ## It interacts with its own Serverless API on AWS
@@ -16,3 +16,9 @@ Build to be deployed on docker :thumbsup:
   - AWS Dynammo
   - AWS SAM
   - BOTO3
+
+## Docker image is builded with
+
+- python3.9:alpine
+- chromium
+- chromium-chromedriver
