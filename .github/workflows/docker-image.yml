@@ -26,7 +26,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: downcase REPO
       run: |
-          echo "REPO=${github.repository_owner,,}" >>${GITHUB_ENV}
+          echo "REPO=${{github.repository_owner,,}}" >>${GITHUB_ENV}
     - uses: docker/build-push-action@v4
       with:
         push: true
