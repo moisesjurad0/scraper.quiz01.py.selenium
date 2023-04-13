@@ -36,6 +36,6 @@ jobs:
         tags: |
           ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
           ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:${{ steps.vars.outputs.tag }}
-          ghcr.io/${{ OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
-          ghcr.io/${{ OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:${{ steps.vars.outputs.tag }}
+          ghcr.io/${{ env.OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
+          ghcr.io/${{ env.OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:${{ steps.vars.outputs.tag }}
 
