@@ -25,12 +25,12 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: downcase REPO
-      run: |
-          echo "REPO=${{github.repository_owner,,}}" >>${GITHUB_ENV}
+      run: |          
+          echo "${{ github.repository_owner }} | tr [:upper:] [:lower:] >> ${GITHUB_ENV}"
     - uses: docker/build-push-action@v4
       with:
         push: true
         tags: |
           ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
-          ghcr.io/${{ env.GITHUB_ENV }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
+          ghcr.io/${{ GITHUB_ENV }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
 
