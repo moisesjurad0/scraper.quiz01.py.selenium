@@ -35,5 +35,4 @@ jobs:
         tags: |
           ghcr.io/${{ env.OWNER_LC }}/scrapper-1:latest
           ghcr.io/${{ env.OWNER_LC }}/scrapper-1:${{ github.run_number }}
-          ghcr.io/${{ env.OWNER_LC }}/scrapper-1:${{ steps.vars.outputs.tag }}
 
