@@ -1,6 +1,5 @@
 """Modulo de llamado al API."""
 import json
-
 import requests
 
 

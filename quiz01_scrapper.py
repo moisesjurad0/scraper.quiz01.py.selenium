@@ -22,6 +22,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import quiz01_api
 
+STARS_SEPARATOR = '***************'
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
 RADIO = 'RADIO'
@@ -155,9 +156,9 @@ def main():
               'Dejarlo vacio usa el default del config.ini'),
         default='1')
     args = parser.parse_args()
-    logger.info('*************** PARAMETROS DE ENTRADA => '
+    logger.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
                 f'--examnumber:{args.examnumber}'
-                ' ***************')
+                f' {STARS_SEPARATOR}')
     exam_number = args.examnumber
 
     exam_section = f'EXAM-{exam_number}'
