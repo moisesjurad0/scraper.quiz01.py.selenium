@@ -35,6 +35,6 @@ jobs:
         tags: |
           ghcr.io/${{ env.OWNER_LC }}/${{ vars.IMAGENAME }}:latest
           ghcr.io/${{ env.OWNER_LC }}/${{ vars.IMAGENAME }}:${{ github.run_number }}
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}:${{ github.run_number }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGENAME }}:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.IMAGENAME }}:${{ github.run_number }}
 
