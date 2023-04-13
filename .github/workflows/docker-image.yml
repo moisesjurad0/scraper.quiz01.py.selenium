@@ -32,7 +32,5 @@ jobs:
     - uses: docker/build-push-action@v4
       with:
         push: true
-        tags: |
-          ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGENAME }}:latest
-          ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGENAME }}:${{ steps.vars.outputs.tag }}
+        tags: ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGENAME }}:latest
 
