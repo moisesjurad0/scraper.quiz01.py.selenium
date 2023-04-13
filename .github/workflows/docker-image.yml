@@ -33,6 +33,6 @@ jobs:
       with:
         push: true
         tags: |
-          ghcr.io/${{ env.OWNER_LC }}/$IMAGENAME:latest
-          ghcr.io/${{ env.OWNER_LC }}/$IMAGENAME:${{ github.run_number }}
+          ghcr.io/${{ env.OWNER_LC }}/${{ vars.IMAGENAME }}:latest
+          ghcr.io/${{ env.OWNER_LC }}/${{ vars.IMAGENAME }}:${{ github.run_number }}
 
