@@ -23,15 +23,19 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: downcase REPO
-      run: |          
-        ABC=$(echo 'print("MOISES".upper())' | python3.9 -)
-        echo $ABC
+        password: ${{ secrets.GITHUB_TOKEN }}    
+    - name: set lower case owner name
+      run: |
+        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        echo $OWNER_LC
+      env:
+        OWNER: '${{ github.repository_owner }}'
     - uses: docker/build-push-action@v4
       with:
         push: true
         tags: |
           ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
-          ghcr.io/moisesjurad0/${{secrets.DOCKERHUB_IMAGENAME}}:latest
+          ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:${{ steps.vars.outputs.tag }}
+          ghcr.io/${{ OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
+          ghcr.io/${{ OWNER_LC }}/${{secrets.DOCKERHUB_IMAGENAME}}:${{ steps.vars.outputs.tag }}
 
