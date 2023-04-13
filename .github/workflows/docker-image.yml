@@ -26,11 +26,12 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: downcase REPO
       run: |          
-          echo "${{ github.repository_owner }} | tr [:upper:] [:lower:] >> ${GITHUB_ENV1}"
+        ABC=$(echo 'print("MOISES".upper())' | python3.9 -)
+        echo $ABC
     - uses: docker/build-push-action@v4
       with:
         push: true
         tags: |
           ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
-          ghcr.io/${{ GITHUB_ENV1 }}/${{secrets.DOCKERHUB_IMAGENAME}}:latest
+          ghcr.io/moisesjurad0/${{secrets.DOCKERHUB_IMAGENAME}}:latest
 
