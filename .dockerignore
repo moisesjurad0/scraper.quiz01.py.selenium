@@ -5,6 +5,7 @@ logs
 venv
 .env
 .git
+.github/*
 chromedriver.exe
 LICENSE.chromedriver
 # valores opcionales de prueba
