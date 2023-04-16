@@ -5,6 +5,7 @@ logs
 venv
 .env
 .env*
+.env.*
 .git
 .github/*
 chromedriver.exe
@@ -12,6 +13,7 @@ LICENSE.chromedriver
 # valores opcionales de prueba
 test.py
 Dockerfile
+Dockerfile*
 Dockerfile.*
 requirements2.txt
 docker-compose.yml
