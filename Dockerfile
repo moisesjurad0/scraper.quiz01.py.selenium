@@ -1,10 +1,11 @@
-FROM python:3.9-alpine3.17
+FROM ghcr.io/moisesjurad0/python-chromium
+# FROM python:3.9-alpine3.17
 
 ## Update the index of available packages
 # https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 # install chromium & chromium-chromedriver
 
-RUN apk update && apk add chromium chromium-chromedriver
+# RUN apk update && apk add chromium chromium-chromedriver
 
 # ChromeDriver 110.0.5481.177 (f34f7ab2d4ca4ad498ef42aeba4f4eb2c1392d63-refs/branch-heads/5481@{#1239})
 # Chromium 110.0.5481.177

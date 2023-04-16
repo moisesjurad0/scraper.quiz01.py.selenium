@@ -3,7 +3,6 @@ services:
 
   scrapper1:
     build: .
-    #image: scrapper1
     image: moisesjurad0/tmp.quiz01-scrapper.py.selenium
     #image: ghcr.io/moisesjurad0/scrapper-1
     tty: true
