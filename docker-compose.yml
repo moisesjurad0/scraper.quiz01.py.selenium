@@ -6,4 +6,4 @@ services:
     #image: scrapper1
     image: moisesjurad0/tmp.quiz01-scrapper.py.selenium
     #image: ghcr.io/moisesjurad0/scrapper-1
-    #image: squartle/scrapper-1:1
+    tty: true
