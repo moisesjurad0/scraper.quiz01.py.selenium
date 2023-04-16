@@ -1,16 +1,19 @@
 __pycache__
-.idea
-.vscode
 logs
 venv
+.idea
+.vscode
 .env
 .env*
 .env.*
 .git
+.github
+.github*
 .github/*
+.gitignore
+.dockerignore
 chromedriver.exe
 LICENSE.chromedriver
-# valores opcionales de prueba
 test.py
 Dockerfile
 Dockerfile*

@@ -1,6 +1,6 @@
 # quiz01-scrapper (python script)
 
-Python proyect designed to interact with and scrap data out of a quizzes web site.
+Python proyect designed to interact with and scrap data out of a specific quizzes web site.
 Build to be deployed on docker :thumbsup::whale:
 
 ## Python script is builded with
@@ -35,4 +35,11 @@ docker run -dt --env-file .env --name <pick-a-name-for-container> <pick-the-imag
 
 # get inside the container and execute as you need 
 docker exec -it <pick-the-container-you-build-in-previous-step> sh
+```
+
+### Or use compose
+
+```docker
+# on the proyect path
+docker compose up
 ```
