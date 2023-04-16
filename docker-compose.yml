@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+
+  scrapper1:
+    build: .
+   #image: scrapper1
+    image: moisesjurad0/quiz01-scrapper.py.selenium
+   #image: ghcr.io/moisesjurad0/scrapper-1

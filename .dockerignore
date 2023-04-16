@@ -4,6 +4,7 @@ __pycache__
 logs
 venv
 .env
+.env*
 .git
 .github/*
 chromedriver.exe
@@ -13,3 +14,5 @@ test.py
 Dockerfile
 Dockerfile.*
 requirements2.txt
+docker-compose.yml
+compose.yml
