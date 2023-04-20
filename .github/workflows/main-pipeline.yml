@@ -12,8 +12,8 @@ on:
 
 jobs:
   
-  sonarcloud:
-    name: SonarCloud
+  sonarcloud-scan:
+    name: SonarCloud Scan ACTION
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,7 +27,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      
+  
+  sonarcloud-quality-gate:
+    needs: sonarcloud-scan
+    name: SonarQube Quality Gate ACTION
+    runs-on: ubuntu-latest
+    steps:
       # Check the Quality Gate status.
       # https://github.com/marketplace/actions/sonarqube-quality-gate-check
       - name: SonarQube Quality Gate check
@@ -40,7 +45,8 @@ jobs:
           #SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
 
   build-docker-image:
-    name: builds docker image
+    needs: sonarcloud-quality-gate
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
