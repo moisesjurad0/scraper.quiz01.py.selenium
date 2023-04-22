@@ -21,3 +21,4 @@ Dockerfile.*
 requirements2.txt
 docker-compose.yml
 compose.yml
+sonar-project.properties
