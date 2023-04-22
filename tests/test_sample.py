@@ -22,9 +22,11 @@ def test_answer():
 )
 def test_multi_sum(a, b):
     assert func(a) == b
-    
+
+
 def fun2(x):
     return x + 2
+
 
 @pytest.mark.parametrize(
     "a,b",
