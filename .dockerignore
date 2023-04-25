@@ -28,4 +28,4 @@ tests/*
 .mypy_cache/
 .coverage
 coverage.xml
-.tox
+.tox/

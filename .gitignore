@@ -13,3 +13,4 @@ requirements2.txt
 .pytest_cache/
 .coverage
 coverage.xml
+.tox/
