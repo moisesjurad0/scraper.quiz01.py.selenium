@@ -18,7 +18,7 @@ FROM ghcr.io/moisesjurad0/python-chromium
 # RUN pip install selenium
 
 # ya no hay necesidad de actualizar el selenium3 a 4 xq en esta versión de alpine (3.16 o 17)
-#   ya viene con el repo de apk (alpine package keeper) actualizado apuntando al ultimo navegador y driver 
+#   ya viene con el repo de apk (alpine package keeper) actualizado apuntando al ultimo navegador y driver
 #   que he puesto más arriba.
 
 WORKDIR /myapp
