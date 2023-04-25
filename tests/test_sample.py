@@ -1,4 +1,4 @@
-"""sumary_line."""
+"""sumary_line. """
 
 import pytest
 
