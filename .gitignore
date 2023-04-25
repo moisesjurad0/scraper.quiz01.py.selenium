@@ -8,6 +8,8 @@ chromedriver.exe
 LICENSE.chromedriver
 requirements2.txt
 .env*
-.pytest_cache
+**/*.log
+.mypy_cache/
+.pytest_cache/
 .coverage
 coverage.xml

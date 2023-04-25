@@ -28,6 +28,7 @@ RUN pip --no-cache-dir install -r requirements.txt
 # esto es para actualizar el selenium3 hacia el 4 si es que no le hubieras puesto version en el requirements o si estuviera la versión3 instalada.
 # RUN pip --no-cache-dir install -r requirements.txt --upgrade
 
-COPY . .
+# COPY ./src/* .
+COPY src/* .
 
 # CMD [ "python", "scrap01.py" ]

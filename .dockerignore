@@ -23,3 +23,9 @@ docker-compose.yml
 compose.yml
 sonar-project.properties
 tests/*
+**/*.log
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+.tox

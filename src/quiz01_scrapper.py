@@ -68,7 +68,7 @@ config = configparser.ConfigParser(interpolation=EnvInterpolation())
 config.read('config.ini')
 
 
-def _analyze_feedback_question(feedback) -> set():
+def _analyze_feedback_question(feedback) -> tuple[str, str]:
     """Determinar el tipo de pregunta."""
     str_input_type = ''
     str_question = ''

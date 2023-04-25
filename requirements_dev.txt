@@ -6,4 +6,7 @@ tox
 pytest
 pytest-cov
 flake8
+flake8-docstrings
 mypy
+types-requests
+types-beautifulsoup4
