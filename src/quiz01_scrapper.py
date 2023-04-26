@@ -20,7 +20,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-import quiz01_api
+import src.quiz01_api
 
 STARS_SEPARATOR = '***************'
 STR_TOFC = 'True or False:'
@@ -167,7 +167,7 @@ def main():
     api_put = config[exam_section]['api_put']
     api_search = config[exam_section]['api_search']
 
-    obj_service = quiz01_api.Service(x_api_key, api_put, api_search)
+    obj_service = src.quiz01_api.Service(x_api_key, api_put, api_search)
 
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
