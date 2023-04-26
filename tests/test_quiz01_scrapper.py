@@ -27,3 +27,17 @@ def test_analyze_feedback_question(monkeypatch):
     )
     assert src.quiz01_scrapper._analyze_feedback_question(
         feedback) == string1, string2
+
+
+def test_main(monkeypatch):
+    """_summary_.
+
+    Args:
+        monkeypatch (_type_): _description_
+    """
+    monkeypatch.setattr(
+        src.quiz01_scrapper,
+        "main",
+        lambda: None
+    )
+    assert src.quiz01_scrapper.main() is None
