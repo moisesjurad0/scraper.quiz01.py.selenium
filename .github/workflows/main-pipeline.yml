@@ -29,8 +29,8 @@ jobs:
   #         args: "--docstring-convention google" 
 
 
-  sonarcloud:
-    name: SonarCloud Scan & Quality Gate Check 
+  tox-to-sonarcloud:
+    name: Tox to SonarCloud (Scan & Quality Gate Check)
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -85,7 +85,7 @@ jobs:
           #SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
 
   build-docker-image:
-    needs: sonarcloud
+    needs: tox-to-sonarcloud
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
 

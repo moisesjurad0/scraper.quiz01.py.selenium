@@ -1,4 +1,4 @@
-FROM ghcr.io/moisesjurad0/python-chromium
+FROM ghcr.io/moisesjurad0/python-chromium:latest
 # FROM python:3.9-alpine3.17
 
 ## Update the index of available packages
