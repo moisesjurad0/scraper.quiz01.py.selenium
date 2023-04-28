@@ -33,16 +33,12 @@ def test_analyze_feedback_question(monkeypatch):
 #     ]
 # )
 # def test_main(arg1, arg2):
-#     """_summary_.
-
-#     Args:
-#         arg1 (_type_): _description_
-#         arg2 (_type_): _description_
-#     """
-#     try:
-#         src.quiz01_scrapper.main([arg1, arg2])
-#     except SystemExit:
-#         pass
+def test_main():
+    """_summary_."""
+    try:
+        quiz01_scrapper.main()
+    except SystemExit:
+        pass
 
 
 def test_main2(monkeypatch):

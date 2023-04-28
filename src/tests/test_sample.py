@@ -92,7 +92,7 @@ def tsuma_2enteros():
 
 
 def greeting(name: str):
-    """_summary_
+    """_summary_.
 
     Args:
         name (str): _description_
