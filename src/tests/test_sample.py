@@ -106,6 +106,8 @@ def greeting(name: str):
 # Argument 1 to "greeting" has incompatible type "int"; expected "str"
 # greeting(3)
 # Argument 1 to "greeting" has incompatible type "bytes"; expected "str"
-greeting(b'Alice')
-greeting("World!")  # No error
-suma_2enteros('1', '2')
+
+# uncomment this to force mypy error
+# greeting(b'Alice')
+# greeting("World!")  # No error
+# suma_2enteros('1', '2')
