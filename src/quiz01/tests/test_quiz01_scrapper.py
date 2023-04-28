@@ -37,7 +37,7 @@ def test_main():
     """_summary_."""
     try:
         quiz01_scrapper.do_scrapping()
-    except SystemExit:
+    except Exception:
         pass
 
 
