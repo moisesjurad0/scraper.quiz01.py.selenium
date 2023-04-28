@@ -29,3 +29,4 @@ tests/*
 .coverage
 coverage.xml
 .tox/
+.reports/

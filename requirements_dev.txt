@@ -8,5 +8,6 @@ pytest-cov
 flake8
 flake8-docstrings
 mypy
+#lxml
 types-requests
 types-beautifulsoup4

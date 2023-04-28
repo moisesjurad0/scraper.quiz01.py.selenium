@@ -145,7 +145,7 @@ def _process_feeback_ticks(ticks, exam_number, f_question_text,
             flag_correct, exam_number, currentDT.isoformat())
 
 
-def main(args=None):
+def main():
     """Main method."""
     parser = argparse.ArgumentParser(description='Scraper0X')
     parser.add_argument(
@@ -155,7 +155,7 @@ def main(args=None):
         help=('Parametro para decidir que examen ejecutar. '
               'Dejarlo vacio usa el default del config.ini'),
         default='1')
-    args = parser.parse_args(args)
+    args = parser.parse_args()
     logger.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
                 f'--examnumber:{args.examnumber}'
                 f' {STARS_SEPARATOR}')
@@ -384,7 +384,7 @@ def main(args=None):
 
 if __name__ == "__main__":
     try:
-        main(sys.argv)
+        main()
         logger.info('fin')
         sys.exit(0)
     except Exception as e:
