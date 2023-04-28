@@ -5,13 +5,10 @@ Returns:
 """
 import argparse
 import configparser
-import os
-import datetime
+from logging import Logger
 import logging
-import sys
+import os
 import uuid
-from pathlib import Path
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -19,8 +16,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-import src.quiz01_api
+from .quiz01_api import Quiz01_Service
 
 STARS_SEPARATOR = '***************'
 STR_TOFC = 'True or False:'
@@ -29,28 +25,12 @@ RADIO = 'RADIO'
 CHECK = 'CHECK'
 RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
-script_path = Path(__file__).absolute()
-script_dir = Path(__file__).parent.absolute()
-log_folder = script_dir / 'logs'
-log_folder.mkdir(parents=True, exist_ok=True)
-
-currentDT = datetime.datetime.now()
-
-logging.basicConfig(
-    filename=log_folder / f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
-    level=logging.INFO,
-    format=('%(asctime)s | %(name)s | %(levelname)s |'
-            ' [%(filename)s:%(lineno)d] | %(message)s'))
-
-logger = logging.getLogger('scrapping01')
-logger.setLevel(logging.INFO)
-logger.info('inicio')
-
-# https://stackoverflow.com/questions/26586801/configparser-and-string-interpolation-with-env-variable
+logger: Logger = logging.getLogger('scrapping01')
 
 
 class EnvInterpolation(configparser.BasicInterpolation):
     """Interpolation which expands environment variables in values."""
+    # https://stackoverflow.com/questions/26586801/configparser-and-string-interpolation-with-env-variable
 
     def before_get(self, parser, section, option, value, defaults):
         """Funcion de sobreEscritura."""
@@ -68,7 +48,7 @@ config = configparser.ConfigParser(interpolation=EnvInterpolation())
 config.read('config.ini')
 
 
-def _analyze_feedback_question(feedback) -> tuple[str, str]:
+def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
     """Determinar el tipo de pregunta."""
     str_input_type = ''
     str_question = ''
@@ -145,7 +125,7 @@ def _process_feeback_ticks(ticks, exam_number, f_question_text,
             flag_correct, exam_number, currentDT.isoformat())
 
 
-def main():
+def do_scrapping(*args):
     """Main method."""
     parser = argparse.ArgumentParser(description='Scraper0X')
     parser.add_argument(
@@ -155,11 +135,11 @@ def main():
         help=('Parametro para decidir que examen ejecutar. '
               'Dejarlo vacio usa el default del config.ini'),
         default='1')
-    args = parser.parse_args()
+    my_args = parser.parse_args(args)
     logger.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
-                f'--examnumber:{args.examnumber}'
+                f'--examnumber:{my_args.examnumber}'
                 f' {STARS_SEPARATOR}')
-    exam_number = args.examnumber
+    exam_number = my_args.examnumber
 
     exam_section = f'EXAM-{exam_number}'
     quiz_url = config[exam_section]['quiz_url']
@@ -167,7 +147,7 @@ def main():
     api_put = config[exam_section]['api_put']
     api_search = config[exam_section]['api_search']
 
-    obj_service = src.quiz01_api.Service(x_api_key, api_put, api_search)
+    obj_service = Quiz01_Service(x_api_key, api_put, api_search)
 
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
@@ -380,13 +360,3 @@ def main():
         print(f'Q{contador_preguntas} - END')
         logger.info(f'Q{contador_preguntas} - END')
     driver.quit()  # driver.close()
-
-
-if __name__ == "__main__":
-    try:
-        main()
-        logger.info('fin')
-        sys.exit(0)
-    except Exception as e:
-        logger.error(str(e), exc_info=True)
-        sys.exit(1)

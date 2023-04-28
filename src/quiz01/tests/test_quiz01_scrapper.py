@@ -2,7 +2,7 @@
 
 # import pytest
 # import src.quiz01_scrapper
-from src import quiz01_scrapper
+from .. import quiz01_scrapper
 # from src.quiz01_scrapper import _analyze_feedback_question, main
 
 
@@ -35,13 +35,13 @@ def test_analyze_feedback_question(monkeypatch):
 # def test_main(arg1, arg2):
 def test_main():
     """_summary_."""
-    try:
-        quiz01_scrapper.main()
-    except SystemExit:
-        pass
+    # try:
+    quiz01_scrapper.do_scrapping()
+    # except SystemExit:
+    #     pass
 
 
-def test_main2(monkeypatch):
+def test_main_mokeyed(monkeypatch):
     """_summary_.
 
     Args:
@@ -49,10 +49,10 @@ def test_main2(monkeypatch):
     """
     monkeypatch.setattr(
         quiz01_scrapper,
-        "main",
+        "do_scrapping",
         lambda: None
     )
-    assert quiz01_scrapper.main() is None
+    assert quiz01_scrapper.do_scrapping() is None
 
 
 ###############

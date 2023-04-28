@@ -3,7 +3,7 @@ import json
 import requests
 
 
-class Service:
+class Quiz01_Service:
     """Clase Servicio para llamar al API."""
 
     def __init__(self, x_api_key, put_url, search_url):
