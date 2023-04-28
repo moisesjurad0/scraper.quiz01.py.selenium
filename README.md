@@ -1,5 +1,7 @@
 # quiz01-scrapper (python script)
 
+![Tests](https://github.com/moisesjurad0/quiz01-scrapper.py.selenium/blob/main/.github/workflows/main-pipeline.yml/badge.svg)
+
 Python proyect designed to interact with and scrap data out of a specific quizzes web site.
 Build to be deployed on docker :thumbsup::whale:
 
