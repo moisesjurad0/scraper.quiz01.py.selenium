@@ -35,10 +35,10 @@ def test_analyze_feedback_question(monkeypatch):
 # def test_main(arg1, arg2):
 def test_main():
     """_summary_."""
-    # try:
-    quiz01_scrapper.do_scrapping()
-    # except SystemExit:
-    #     pass
+    try:
+        quiz01_scrapper.do_scrapping()
+    except SystemExit:
+        pass
 
 
 def test_main_mokeyed(monkeypatch):
