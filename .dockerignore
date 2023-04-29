@@ -30,3 +30,7 @@ tests/*
 coverage.xml
 .tox/
 .reports/
+**/__pycache__/
+**/logs/
+**/log/
+**/.pytest_cache/

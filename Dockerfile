@@ -32,6 +32,6 @@ RUN pip --no-cache-dir install -r requirements.txt
 # RUN pip --no-cache-dir install -r requirements.txt --upgrade
 
 # COPY ./src/* .
-COPY src/* .
+COPY src .
 
 # CMD [ "python", "scrap01.py" ]
