@@ -5,6 +5,7 @@ Returns:
 """
 import argparse
 import configparser
+import datetime
 from logging import Logger
 import logging
 import os
@@ -26,6 +27,7 @@ CHECK = 'CHECK'
 RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
 logger: Logger = logging.getLogger('scrapping01')
+currentDT: datetime.datetime = datetime.datetime.now()
 
 
 class EnvInterpolation(configparser.BasicInterpolation):

@@ -26,6 +26,7 @@ logger.setLevel(logging.INFO)
 def main():
     """_summary_."""
     quiz01_scrapper.logger = logger
+    quiz01_scrapper.currentDT = currentDT
     quiz01_scrapper.do_scrapping()
 
 

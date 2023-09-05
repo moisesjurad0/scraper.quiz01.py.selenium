@@ -1,17 +1,21 @@
 __pycache__
 .idea
 .vscode
-logs
-venv
-.env
-chromedriver.exe
-LICENSE.chromedriver
-requirements2.txt
-.env*
+logs/
 **/*.log
+.venv/
+venv/
+.env
+.env*
+.*.env
 .mypy_cache/
 .pytest_cache/
 .coverage
-coverage.xml
 .tox/
 .reports/
+
+requirements2.txt
+coverage.xml
+
+# chromedriver.exe
+# LICENSE.chromedriver
