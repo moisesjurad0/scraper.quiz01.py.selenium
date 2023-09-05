@@ -44,4 +44,7 @@ docker exec -it <pick-the-container-you-build-in-previous-step> sh
 ```docker
 # on the proyect path
 docker compose up
+
+# also can rebuild it before running up
+docker-compose up --build
 ```
