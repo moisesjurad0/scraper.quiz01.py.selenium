@@ -12,6 +12,8 @@ venv
 .github/*
 .gitignore
 .dockerignore
+chromedriver-win64/
+chromedriver-win64/*
 chromedriver.exe
 LICENSE.chromedriver
 test.py

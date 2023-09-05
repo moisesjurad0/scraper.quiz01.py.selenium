@@ -19,13 +19,43 @@ Build to be deployed on docker :thumbsup::whale:
   - [AWS Dynammo](https://docs.aws.amazon.com/dynamodb/index.html)  
   - [BOTO3](https://docs.aws.amazon.com/serverless-application-model/?icmpid=docs_homepage_compute)
 
-## Docker image is builded with
+## Docker Image
+
+### Docker Image available on
+
+#### GitHub Packages
+
+<https://github.com/moisesjurad0/quiz01-scrapper.py.selenium/pkgs/container/scrapper-1>
+
+```sh
+docker pull ghcr.io/moisesjurad0/scrapper-1:53
+# or
+docker pull ghcr.io/moisesjurad0/scrapper-1:latest
+# or 
+docker pull ghcr.io/moisesjurad0/scrapper-1
+```
+
+or
+
+#### Docker Hub
+
+<https://hub.docker.com/repository/docker/squartle/scrapper-1/general>
+
+```sh
+docker pull squartle/scrapper-1:53
+# or
+docker pull squartle/scrapper-1:latest
+# or 
+docker pull squartle/scrapper-1
+```
+
+### Docker Image is builded with
 
 - [python3.9:alpine](https://hub.docker.com/layers/library/python/3.9-alpine3.17/images/sha256-de1fbc63ac86f6a65d160df2bc4f31affd1c3fdbe9ea0f68e1ba85054f8d1c6e?context=explore)
 - [chromium](https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium)
 - [chromium-chromedriver](<https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium-chromedriver>)
 
-### To run the imagen follow this steps
+### To run the Image follow this steps
 
 ```sh
 # build the image
