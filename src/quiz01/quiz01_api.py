@@ -3,6 +3,25 @@ import json
 import requests
 
 
+def log_method_call(func):
+    def wrapper(*args, **kwargs):
+        method_name = func.__name__
+        args_str = ', '.join([repr(arg) for arg in args])
+        kwargs_str = ', '.join(
+            [f"{key}={repr(value)}" for key, value in kwargs.items()])
+        params_str = ', '.join(filter(None, [args_str, kwargs_str]))
+
+        print(f"CALL '{method_name}' --> ({params_str})")
+
+        result = func(*args, **kwargs)
+
+        print(f"END '{method_name}' --> returned {repr(result)}")
+
+        return result
+
+    return wrapper
+
+
 class Quiz01_Service:
     """Clase Servicio para llamar al API."""
 
@@ -18,6 +37,7 @@ class Quiz01_Service:
         self.put_url = put_url
         self.search_url = search_url
 
+    @log_method_call
     def put(self, v_id, question, question_type,
             answer, flag_correct, exam_number, last_modify):
         """Metodo put.
@@ -51,6 +71,7 @@ class Quiz01_Service:
         print(response.text)
         response.raise_for_status()
 
+    @log_method_call
     def search_v2(self, question='', question_type='',
                   answer='', flag_correct=True, exam_number=''):
         """Funcion de busqueda v2.

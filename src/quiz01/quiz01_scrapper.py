@@ -109,7 +109,7 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
 
 
 def _process_feeback_ticks(ticks, exam_number, f_question_text,
-                           f_type, flag_correct, obj_service):
+                           f_type, flag_correct, obj_service: Quiz01_Service):
     for tick in ticks:
         if f_type == RADIO_BOOL:
             f_answer_ok_text = (
@@ -149,7 +149,11 @@ def do_scrapping(*args):
     api_put = config[exam_section]['api_put']
     api_search = config[exam_section]['api_search']
 
-    obj_service = Quiz01_Service(x_api_key, api_put, api_search)
+    obj_service: Quiz01_Service = Quiz01_Service(
+        x_api_key,
+        api_put,
+        api_search
+    )
 
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
