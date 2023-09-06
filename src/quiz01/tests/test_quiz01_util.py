@@ -11,7 +11,9 @@ def test_decorator():
 
     @quiz01_util.log_method_call
     def hello(who: str):
-        print(f'hello {who}')
+        retuned_string: str = f'hello {who}'
+        print(retuned_string)
+        return retuned_string
 
     # Call the decorated function
     result = hello('m01')
