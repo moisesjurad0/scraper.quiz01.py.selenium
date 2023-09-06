@@ -1,4 +1,5 @@
 """Modulo Util con decorator para logs."""
+import logging
 
 
 def log_method_call(func):
@@ -9,11 +10,15 @@ def log_method_call(func):
             [f"{key}={repr(value)}" for key, value in kwargs.items()])
         params_str = ', '.join(filter(None, [args_str, kwargs_str]))
 
-        print(f"CALL '{method_name}' --> ({params_str})")
+        in_str = f"CALL '{method_name}' --> ({params_str})"
+        print(in_str)
+        logging.info(in_str)
 
         result = func(*args, **kwargs)
 
-        print(f"END '{method_name}' --> returned {repr(result)}")
+        out_str = f"END '{method_name}' --> returned {repr(result)}"
+        print(out_str)
+        logging.info(out_str)
 
         return result
 

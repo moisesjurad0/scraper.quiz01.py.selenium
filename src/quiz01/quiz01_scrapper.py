@@ -6,7 +6,6 @@ Returns:
 import argparse
 import configparser
 import datetime
-from logging import Logger
 import logging
 import os
 import uuid
@@ -26,7 +25,6 @@ RADIO = 'RADIO'
 CHECK = 'CHECK'
 RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
-logger: Logger = logging.getLogger('scrapping01')
 currentDT: datetime.datetime = datetime.datetime.now()
 
 
@@ -63,7 +61,7 @@ def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
             contents[0].contents[0].next_element.text)
         str_input_type = RADIO
     except Exception as e1:
-        logger.warning(str(e1), exc_info=True)
+        logging.warning(str(e1), exc_info=True)
 
         try:
             # we_question stands for WebElement Question
@@ -89,7 +87,7 @@ def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
                 str_question = we_question.text
 
         except Exception as e2:
-            logger.error(str(e2), exc_info=True)
+            logging.error(str(e2), exc_info=True)
 
     return str_input_type, str_question
 
@@ -120,7 +118,7 @@ def _process_feeback_ticks(ticks, exam_number, f_question_text,
                 tick.previous_sibling.next_element.next_element.
                 next_element.next_element.next_element.next_element.text)
         print(f_answer_ok_text)
-        logger.info(f_answer_ok_text)
+        logging.info(f_answer_ok_text)
         obj_service.put(
             f'{f_question_text}---{f_answer_ok_text}',
             f_question_text, f_type, f_answer_ok_text,
@@ -138,9 +136,9 @@ def do_scrapping(*args):
               'Dejarlo vacio usa el default del config.ini'),
         default='1')
     my_args = parser.parse_args(args)
-    logger.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
-                f'--examnumber:{my_args.examnumber}'
-                f' {STARS_SEPARATOR}')
+    logging.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
+                 f'--examnumber:{my_args.examnumber}'
+                 f' {STARS_SEPARATOR}')
     exam_number = my_args.examnumber
 
     exam_section = f'EXAM-{exam_number}'
@@ -157,7 +155,7 @@ def do_scrapping(*args):
 
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
-    logger.info(f'v_uuid->{v_uuid}')
+    logging.info(f'v_uuid->{v_uuid}')
 
     driver_location = config['DEFAULT']['driver_location']
     binary_location = config['DEFAULT']['binary_location']
@@ -221,7 +219,7 @@ def do_scrapping(*args):
          '[2]')
     )).click()
 
-    logger.info('SECTION - ANSWERING QUESTIONS')
+    logging.info('SECTION - ANSWERING QUESTIONS')
     while True:
         div_xpath = (
             '/html/body/'
@@ -231,7 +229,7 @@ def do_scrapping(*args):
             WebDriverWait(driver, 3).until_not(
                 EC.visibility_of_element_located((By.XPATH, div_xpath)))
         except Exception as ex1:
-            logger.error(str(ex1), exc_info=True)
+            logging.error(str(ex1), exc_info=True)
         finally:
             div_question_text = WebDriverWait(driver, EW).until(
                 EC.visibility_of_element_located(
@@ -257,11 +255,11 @@ def do_scrapping(*args):
             'ion-list/ion-radio-group/ion-item')
 
         if do_correct_answers:
-            logger.info('SECTION - DO CORRECT ANSWERS')
+            logging.info('SECTION - DO CORRECT ANSWERS')
             stored_data = obj_service.search_v2(
                 question=div_question_text, flag_correct=True)
             if stored_data:
-                logger.info('ITEM - DATA FOUND')
+                logging.info('ITEM - DATA FOUND')
                 for stored_item in stored_data:
                     for scrapped_answer in scrapped_answers_to_choose:
                         scrapped_answer_txt = scrapped_answer.find_element(
@@ -270,11 +268,11 @@ def do_scrapping(*args):
                             _roll_n_click_to_answer(driver, scrapped_answer)
                             break
             else:
-                logger.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
+                logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
                 _mark_dom_answers(driver, scrapped_answers_to_choose)
 
         else:
-            logger.info('SECTION - DUMMY ANSWERS')
+            logging.info('SECTION - DUMMY ANSWERS')
             _mark_dom_answers(driver, scrapped_answers_to_choose)
 
         btn_css_selector = (
@@ -314,7 +312,7 @@ def do_scrapping(*args):
                 )).click()
             break
 
-    logger.info(
+    logging.info(
         'HACER UN WAIT DE LA PAGINA DE RESULTADO, '
         'DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
 
@@ -327,7 +325,7 @@ def do_scrapping(*args):
     WebDriverWait(driver, EW).until(EC.presence_of_element_located(
         (By.XPATH, '//*[@id="contents"]/div')))
 
-    logger.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
+    logging.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
 
     page_source = driver.page_source
     soup = BeautifulSoup(page_source, 'html.parser')
@@ -341,7 +339,7 @@ def do_scrapping(*args):
         f_type, f_question_text = _analyze_feedback_question(feedback)
 
         print(f'Q{contador_preguntas} - {f_question_text}')
-        logger.info(f'Q{contador_preguntas} - {f_question_text}')
+        logging.info(f'Q{contador_preguntas} - {f_question_text}')
 
         correct_ticks = feedback.select(
             '.circular-tick, .circular-tick-holo')
@@ -364,5 +362,5 @@ def do_scrapping(*args):
         #   .select('ion-icon:not(.circular-tick-holo,.circular-tick)')
 
         print(f'Q{contador_preguntas} - END')
-        logger.info(f'Q{contador_preguntas} - END')
+        logging.info(f'Q{contador_preguntas} - END')
     driver.quit()  # driver.close()

@@ -18,24 +18,22 @@ logging.basicConfig(
     level=logging.INFO,
     format=('%(asctime)s | %(name)s | %(levelname)s |'
             ' [%(filename)s:%(lineno)d] | %(message)s'))
-
-logger = logging.getLogger('scrapping01')
-logger.setLevel(logging.INFO)
+# logger = logging.getLogger('scrapping01')
+# logger.setLevel(logging.INFO)
 
 
 def main():
     """_summary_."""
-    quiz01_scrapper.logger = logger
     quiz01_scrapper.currentDT = currentDT
     quiz01_scrapper.do_scrapping()
 
 
 if __name__ == "__main__":
     try:
-        logger.info('inicio')
+        logging.info('inicio')
         main()
-        logger.info('fin')
+        logging.info('fin')
         sys.exit(0)
     except Exception as e:
-        logger.error(str(e), exc_info=True)
+        logging.error(str(e), exc_info=True)
         sys.exit(1)

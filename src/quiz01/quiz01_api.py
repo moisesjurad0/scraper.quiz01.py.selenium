@@ -50,8 +50,8 @@ class quiz01Service:
 
         response = requests.request(
             "POST", self.put_url, headers=headers, data=payload)
-        print(response.text)
         response.raise_for_status()
+        return response.json()
 
     @log_method_call
     def search_v2(self, question='', question_type='',
@@ -83,6 +83,5 @@ class quiz01Service:
         response = requests.request(
             "POST", self.search_url, headers=headers, data=payload)
 
-        print(response.text)
         response.raise_for_status()
         return response.json()
