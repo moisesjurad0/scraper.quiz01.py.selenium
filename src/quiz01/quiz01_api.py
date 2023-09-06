@@ -1,28 +1,10 @@
 """Modulo de llamado al API."""
 import json
 import requests
+from .quiz01_util import log_method_call
 
 
-def log_method_call(func):
-    def wrapper(*args, **kwargs):
-        method_name = func.__name__
-        args_str = ', '.join([repr(arg) for arg in args])
-        kwargs_str = ', '.join(
-            [f"{key}={repr(value)}" for key, value in kwargs.items()])
-        params_str = ', '.join(filter(None, [args_str, kwargs_str]))
-
-        print(f"CALL '{method_name}' --> ({params_str})")
-
-        result = func(*args, **kwargs)
-
-        print(f"END '{method_name}' --> returned {repr(result)}")
-
-        return result
-
-    return wrapper
-
-
-class Quiz01_Service:
+class quiz01Service:
     """Clase Servicio para llamar al API."""
 
     def __init__(self, x_api_key, put_url, search_url):

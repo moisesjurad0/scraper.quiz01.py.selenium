@@ -17,7 +17,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from .quiz01_api import Quiz01_Service
+from .quiz01_api import quiz01Service
 
 STARS_SEPARATOR = '***************'
 STR_TOFC = 'True or False:'
@@ -109,7 +109,7 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
 
 
 def _process_feeback_ticks(ticks, exam_number, f_question_text,
-                           f_type, flag_correct, obj_service: Quiz01_Service):
+                           f_type, flag_correct, obj_service: quiz01Service):
     for tick in ticks:
         if f_type == RADIO_BOOL:
             f_answer_ok_text = (
@@ -149,7 +149,7 @@ def do_scrapping(*args):
     api_put = config[exam_section]['api_put']
     api_search = config[exam_section]['api_search']
 
-    obj_service: Quiz01_Service = Quiz01_Service(
+    obj_service: quiz01Service = quiz01Service(
         x_api_key,
         api_put,
         api_search
