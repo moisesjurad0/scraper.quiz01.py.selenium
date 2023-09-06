@@ -1,7 +1,5 @@
 name: Delete old package versions
-on:
-  schedule:
-    - cron: 59 23 31 12 *
+on: workflow_dispatch
 jobs:
   delete-old-versions:
     runs-on: ubuntu-latest
