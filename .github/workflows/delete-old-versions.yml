@@ -1,19 +1,23 @@
 name: Delete old package versions
 on:
-  workflow_dispatch:
-    inputs:
-      package-name:
-        description: "package name to delete"
-        default: "scrapper-1"
-        type: string
-        required: true
+  workflow_dispatch
+  # workflow_dispatch:
+  #   inputs:
+  #     package-name:
+  #       description: "package name to delete"
+  #       default: "scrapper-1"
+  #       type: string
+  #       required: true
 
 jobs:
   delete-old-versions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/delete-package-versions@v2
+      - name: Delete Package Versions
+        uses: actions/delete-package-versions@v4.1.1
         with:
-          package-name: ${{ inputs.package-name }}
+          # package-name: ${{ inputs.package-name }}
+          package-name: ${{ vars.IMAGENAME }}
+          package-type: "container"
           min-versions-to-keep: 4
           token: ${{ secrets.GITHUB_TOKEN }}
