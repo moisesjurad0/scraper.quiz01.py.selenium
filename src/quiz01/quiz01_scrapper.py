@@ -16,16 +16,33 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from .quiz01_api import quiz01Service
+from .quiz01_api import Quiz01Service, Quiz01ServiceFromClient
+from swagger_client import QuestionModel
+from typing import List  # , Optional
 
 STARS_SEPARATOR = '***************'
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
+STR_NOT = 'NOT'
 RADIO = 'RADIO'
 CHECK = 'CHECK'
 RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
 currentDT: datetime.datetime = datetime.datetime.now()
+XPATH_1ST_BTN = (
+    '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
+XPATH_2ND_BTN = (
+    '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button[2]')
+XPATH_ANSW_Q_DIV = (
+    '/html/body/'
+    'div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
+    'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
+XPATH_ANSW_Q_CHEK_RADI = (
+    '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
+    'ion-list/ion-item'
+    ' | '
+    '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
+    'ion-list/ion-radio-group/ion-item')
 
 
 class EnvInterpolation(configparser.BasicInterpolation):
@@ -46,6 +63,11 @@ config = configparser.ConfigParser(interpolation=EnvInterpolation())
 #     interpolation=configparser.ExtendedInterpolation())
 # config = configparser.SafeConfigParser(os.environ)
 config.read('config.ini')
+
+
+def _click(driver, xpath: str):
+    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
+        (By.XPATH, xpath))).click()
 
 
 def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
@@ -77,7 +99,7 @@ def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
                 str_question = we_question.next_element.text.lstrip()
 
             elif we_question.text[-1] == ' ':
-                if we_question.next_element.next_element.text == 'NOT':
+                if we_question.next_element.next_element.text == STR_NOT:
                     str_question = (
                         we_question.text +
                         we_question.next_element.next_element.text +
@@ -106,10 +128,18 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
         EC.element_to_be_clickable(scrapped_answer)).click()
 
 
-def _process_feeback_ticks(ticks, exam_number, f_question_text,
-                           f_type, flag_correct, obj_service: quiz01Service):
-    for tick in ticks:
-        if f_type == RADIO_BOOL:
+def _process_feeback_ticks(
+        p_ticks,
+        p_exam_number: int,
+        p_question_text,
+        p_type,
+        p_flag_correct,
+        p_obj_service: Quiz01Service,
+        p_flag_dont_override=False,
+        p_flag_batch: bool = False,
+        p_lista_put: List[QuestionModel] = []):
+    for tick in p_ticks:
+        if p_type == RADIO_BOOL:
             f_answer_ok_text = (
                 tick.previous_sibling.next_element.next_element.
                 next_element.next_element.next_element.text)
@@ -119,10 +149,34 @@ def _process_feeback_ticks(ticks, exam_number, f_question_text,
                 next_element.next_element.next_element.next_element.text)
         print(f_answer_ok_text)
         logging.info(f_answer_ok_text)
-        obj_service.put(
-            f'{f_question_text}---{f_answer_ok_text}',
-            f_question_text, f_type, f_answer_ok_text,
-            flag_correct, exam_number, currentDT.isoformat())
+        if p_flag_batch:
+            if p_flag_dont_override:
+                stored_data = p_obj_service.get_cache()
+                filtered_data = list(filter(
+                    lambda i:
+                        i['id'] == p_question_text and
+                        i['question_type'] == p_type and
+                        i['answer_text'] == f_answer_ok_text and
+                        i['is_correct'] == p_flag_correct and
+                        i['exam_number'] == p_exam_number,
+                        stored_data['Items']))
+
+                if filtered_data:
+                    continue
+
+            p_lista_put.append(
+                QuestionModel(
+                    id=p_question_text,
+                    question_type=p_type,
+                    answer_text=f_answer_ok_text,
+                    is_correct=p_flag_correct,
+                    exam_number=p_exam_number,
+                    last_modified=currentDT.isoformat()))
+        else:
+            p_obj_service.put(
+                f'{p_question_text}---{f_answer_ok_text}',
+                p_question_text, p_type, f_answer_ok_text,
+                p_flag_correct, p_exam_number, currentDT.isoformat())
 
 
 def do_scrapping(*args):
@@ -134,7 +188,7 @@ def do_scrapping(*args):
         required=False,
         help=('Parametro para decidir que examen ejecutar. '
               'Dejarlo vacio usa el default del config.ini'),
-        default='1')
+        default=1)
     my_args = parser.parse_args(args)
     logging.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
                  f'--examnumber:{my_args.examnumber}'
@@ -146,11 +200,10 @@ def do_scrapping(*args):
     x_api_key = config[exam_section]['x-api-key']
     api_put = config[exam_section]['api_put']
     api_search = config[exam_section]['api_search']
-
-    obj_service: quiz01Service = quiz01Service(
+    api_endpoint = config[exam_section]['api_endpoint']
+    obj_service: Quiz01Service = Quiz01ServiceFromClient(
         x_api_key,
-        api_put,
-        api_search
+        api_endpoint
     )
 
     v_uuid = uuid.uuid4().hex
@@ -161,6 +214,9 @@ def do_scrapping(*args):
     binary_location = config['DEFAULT']['binary_location']
     headless = config.getboolean('DEFAULT', 'headless')
     do_correct_answers = config.getboolean('DEFAULT', 'do_correct_answers')
+    do_correct_answers_cache = config.getboolean(
+        'DEFAULT', 'do_correct_answers_cache')
+    dont_override = config.getboolean('DEFAULT', 'dont_override')
 
     service = Service(driver_location)
     options = Options()
@@ -206,74 +262,75 @@ def do_scrapping(*args):
     # default is zero
     # driver.implicitly_wait(implicitly_wait)
 
-    # press 1st button Next
-    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
-        (By.XPATH,
-         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
-    )).click()
-
-    # press 2nd button Next
-    WebDriverWait(driver, EW).until(EC.element_to_be_clickable(
-        (By.XPATH,
-         '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button'
-         '[2]')
-    )).click()
+    _click(driver, XPATH_1ST_BTN)  # press 1st button Next
+    _click(driver, XPATH_2ND_BTN)  # press 2nd button Next
 
     logging.info('SECTION - ANSWERING QUESTIONS')
     while True:
-        div_xpath = (
-            '/html/body/'
-            'div/ion-app/div/div[1]/ion-content/div/div[2]/div/div[4]/div/'
-            'ion-card/ion-card-content/div/ion-list/ion-list-header/div/div')
         try:
             WebDriverWait(driver, 3).until_not(
-                EC.visibility_of_element_located((By.XPATH, div_xpath)))
+                EC.visibility_of_element_located((By.XPATH, XPATH_ANSW_Q_DIV)))
         except Exception as ex1:
             logging.error(str(ex1), exc_info=True)
         finally:
             div_question_text = WebDriverWait(driver, EW).until(
-                EC.visibility_of_element_located(
-                    (By.XPATH, div_xpath)
-                )).text.split("\n")[0]
+                EC.visibility_of_element_located((By.XPATH, XPATH_ANSW_Q_DIV)
+                                                 )).text.split("\n")[0]
             if div_question_text.startswith(STR_TOFCS):
                 div_question_text = div_question_text.split(STR_TOFCS)[1]
             print(div_question_text)
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located(
-            # (By.XPATH, div_xpath)))
+            # (By.XPATH, XPATH_ANSW_Q_DIV)))
         # div_question = WebDriverWait(driver, ew).until(
-            # EC.presence_of_element_located((By.XPATH, div_xpath)))
+            # EC.presence_of_element_located((By.XPATH, XPATH_ANSW_Q_DIV)))
         # print(div_question.text)
 
         # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
-        scrapped_answers_to_choose = driver.find_elements(
-            By.XPATH,
-            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
-            'ion-list/ion-item'
-            ' | '
-            '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
-            'ion-list/ion-radio-group/ion-item')
+        scraped_answers_to_choose = driver.find_elements(
+            By.XPATH, XPATH_ANSW_Q_CHEK_RADI)
 
-        if do_correct_answers:
-            logging.info('SECTION - DO CORRECT ANSWERS')
-            stored_data = obj_service.search_v2(
-                question=div_question_text, flag_correct=True)
-            if stored_data:
+        if not do_correct_answers:
+            logging.info('SECTION - DUMMY ANSWERS')
+            _mark_dom_answers(driver, scraped_answers_to_choose)
+        elif do_correct_answers and do_correct_answers_cache:
+            logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
+            stored_data = obj_service.get_cache()
+            filtered_data = list(filter(
+                lambda i: i['id'] == div_question_text and i['is_correct'],
+                stored_data['Items']))
+
+            # IMPROVE THIS BUCLE
+            # 1 -> the stored answers COULd be the 2 last of the list
+            # 2 -> the stored answer could be non existant
+            if filtered_data:
                 logging.info('ITEM - DATA FOUND')
-                for stored_item in stored_data:
-                    for scrapped_answer in scrapped_answers_to_choose:
-                        scrapped_answer_txt = scrapped_answer.find_element(
+                for stored_item in filtered_data:
+                    for scraped_answer in scraped_answers_to_choose:
+                        scraped_answer_txt = scraped_answer.find_element(
                             By.CLASS_NAME, 'bbcode, cursor-pointer').text
-                        if stored_item['answer'] == scrapped_answer_txt:
-                            _roll_n_click_to_answer(driver, scrapped_answer)
+                        if (stored_item['answer_text'] == scraped_answer_txt):
+                            _roll_n_click_to_answer(driver, scraped_answer)
                             break
             else:
                 logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
-                _mark_dom_answers(driver, scrapped_answers_to_choose)
-
-        else:
-            logging.info('SECTION - DUMMY ANSWERS')
-            _mark_dom_answers(driver, scrapped_answers_to_choose)
+                _mark_dom_answers(driver, scraped_answers_to_choose)
+        elif do_correct_answers:
+            logging.info('SECTION - DO CORRECT ANSWERS')
+            stored_data = obj_service.search_v2(
+                question=div_question_text, flag_correct=True)
+            if stored_data['Items']:
+                logging.info('ITEM - DATA FOUND')
+                for stored_item in stored_data['Items']:
+                    for scraped_answer in scraped_answers_to_choose:
+                        scraped_answer_txt = scraped_answer.find_element(
+                            By.CLASS_NAME, 'bbcode, cursor-pointer').text
+                        if stored_item['answer'] == scraped_answer_txt:
+                            _roll_n_click_to_answer(driver, scraped_answer)
+                            break
+            else:
+                logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
+                _mark_dom_answers(driver, scraped_answers_to_choose)
 
         btn_css_selector = (
             'ion-button[data-cy="continue-btn"]'
@@ -332,6 +389,8 @@ def do_scrapping(*args):
 
     contador_preguntas = 0
     feedbacks = soup.find_all('div', class_='feedback')
+
+    lista_put: List[QuestionModel] = []
     for feedback in feedbacks:
         contador_preguntas += 1
         print(feedback.text)
@@ -343,8 +402,16 @@ def do_scrapping(*args):
 
         correct_ticks = feedback.select(
             '.circular-tick, .circular-tick-holo')
-        _process_feeback_ticks(correct_ticks, exam_number,
-                               f_question_text, f_type, True, obj_service)
+        _process_feeback_ticks(
+            correct_ticks,
+            exam_number,
+            f_question_text,
+            f_type,
+            True,
+            obj_service,
+            dont_override,
+            True,
+            lista_put)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
         # correctos = feedback.find_all_next(
         #      'ion-icon', class_='circular-tick-holo')
@@ -352,8 +419,16 @@ def do_scrapping(*args):
         incorrect_ticks = feedback.select(
             'ion-icon[class="icon icon-correct md hydrated"]'
             ':not(.circular-tick-holo,.circular-tick)')  # v4
-        _process_feeback_ticks(incorrect_ticks, exam_number,
-                               f_question_text, f_type, False, obj_service)
+        _process_feeback_ticks(
+            incorrect_ticks,
+            exam_number,
+            f_question_text,
+            f_type,
+            False,
+            obj_service,
+            dont_override,
+            True,
+            lista_put)
         # OTRAS MANERAS DE INVOCAR EL SELECTOR
         # v0#'circular-x' #para los incorrectos
         # v1#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
@@ -363,4 +438,7 @@ def do_scrapping(*args):
 
         print(f'Q{contador_preguntas} - END')
         logging.info(f'Q{contador_preguntas} - END')
+    if lista_put:
+        obj_service.put_batch(lista_put)
+    # obj_service.end_connection()
     driver.quit()  # driver.close()

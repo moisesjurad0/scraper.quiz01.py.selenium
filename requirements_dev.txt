@@ -11,3 +11,4 @@ mypy
 #lxml
 types-requests
 types-beautifulsoup4
+./python-client-generated/

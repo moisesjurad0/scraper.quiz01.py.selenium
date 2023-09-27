@@ -2,3 +2,8 @@ beautifulsoup4==4.11.2 # bs4
 selenium==4.8.2
 requests==2.27.1
 #lxml
+#-e ./python-client-generated/
+#swagger_client
+#swagger-client
+#swaggerpy
+./python-client-generated/
