@@ -3,6 +3,11 @@ import logging
 
 
 def log_method_call(func):
+    """Custom logger decorator to mark begin and end timestamps.
+
+    Args:
+        func (_type_): Function to be logged
+    """
     def wrapper(*args, **kwargs):
         method_name = func.__name__
         args_str = ', '.join([repr(arg) for arg in args])
