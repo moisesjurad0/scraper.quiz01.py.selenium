@@ -7,3 +7,5 @@ requests==2.27.1
 #swagger-client
 #swaggerpy
 ./python-client-generated/
+typer
+rich

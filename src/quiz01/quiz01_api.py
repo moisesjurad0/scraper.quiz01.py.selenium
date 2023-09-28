@@ -1,11 +1,13 @@
 """Modulo de llamado al API."""
 import json
+from pprint import pprint
+from typing import List
+
 import requests
 import swagger_client
 from swagger_client.rest import ApiException
-from .quiz01_util import log_method_call
-from pprint import pprint
-from typing import List
+
+from .quiz01_util import log_method_call, log_method_call_no_params
 
 
 class Quiz01Service:
@@ -18,7 +20,7 @@ class Quiz01Service:
             x_api_key (_type_): _description_
         """
         self.x_api_key = x_api_key
-        self.cache = None
+        self.cache = dict()
         self.api_instance = None
 
     def put(
@@ -50,7 +52,8 @@ class Quiz01Service:
         pass
 
     def get_cache(
-            self):
+            self,
+            exam_number: int):
         """Duck method."""
         pass
 
@@ -177,22 +180,26 @@ class Quiz01ServiceFromClient(Quiz01Service):
 
         return self.api_instance
 
-    @log_method_call
-    def get_cache(self):
+    @log_method_call_no_params
+    def get_cache(self, exam_number: int):
         """_summary_.
 
         Returns:
             _type_: _description_
         """
-        if self.cache is None:
+        # if self.cache:
+        if exam_number not in self.cache:
+            body = swagger_client.QuestionScanModel(
+                exam_number=exam_number)
             try:
-                self.cache = self._get_api_instance().get_all_items_api_v1_questions_get()
-                pprint(self.cache)
+                self.cache[exam_number] = self._get_api_instance(
+                ).search_items_begins_with_api_v1_questions_search_begins_with_post(body)
+                # pprint(api_response)
             except ApiException as exception:
                 print(
                     "Exception when calling QuestionsApi->search_items_api_v1_questions_contains_post: %s\n" %
                     exception)
-        return self.cache
+        return self.cache[exam_number]
 
     @log_method_call
     def put(
@@ -244,7 +251,7 @@ class Quiz01ServiceFromClient(Quiz01Service):
         # response.raise_for_status()
         # return response.json()|
 
-    @log_method_call
+    @log_method_call_no_params
     def put_batch(
             self,
             my_list: List[swagger_client.QuestionModel]

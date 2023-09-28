@@ -12,3 +12,6 @@ mypy
 types-requests
 types-beautifulsoup4
 ./python-client-generated/
+isort
+typer
+rich

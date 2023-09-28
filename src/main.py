@@ -1,38 +1,47 @@
 """main script module without package."""
-import sys
-import datetime
 import logging
+import sys
 from pathlib import Path
-from quiz01 import quiz01_scrapper
-# from quiz01.quiz01_scrapper import do_scrapping
+
+import typer
+
+from quiz01 import config, quiz01_scraper
 
 script_path = Path(__file__).absolute()
 script_dir = Path(__file__).parent.absolute()
 log_folder = script_dir / 'logs'
 log_folder.mkdir(parents=True, exist_ok=True)
 
-currentDT = datetime.datetime.now()
-
 logging.basicConfig(
-    filename=log_folder / f'scrap01{currentDT.strftime("%Y%m%d%H%M%S")}.log',
+    filename=log_folder /
+    f'quiz01scraper{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
     level=logging.INFO,
-    format=('%(asctime)s | %(name)s | %(levelname)s |'
-            ' [%(filename)s:%(lineno)d] | %(message)s'))
-# logger = logging.getLogger('scrapping01')
-# logger.setLevel(logging.INFO)
+    format=(
+        '%(asctime)s | %(name)s | %(levelname)s |'
+        ' [%(filename)s:%(lineno)d] | %(message)s'))
 
 
-def main():
-    """_summary_."""
-    quiz01_scrapper.currentDT = currentDT
-    quiz01_scrapper.do_scrapping()
+def main(exam_number: int):
+    """Quiz01-Scraper => Scrape CLI.
+
+    Args:
+        exam_number (int, optional): Parametro para decidir que examen ejecutar. Dejarlo vacio usa el default del config.ini. Defaults to 1.
+    """
+    logging.info(f'{config.STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
+                 f'exam_number:{exam_number}'
+                 f' {config.STARS_SEPARATOR}')
+    quiz01_scraper.do_scraping(exam_number)
+
+
+# if __name__ == "__main__":
+#     typer.run(main)
 
 
 if __name__ == "__main__":
     try:
-        logging.info('inicio')
-        main()
-        logging.info('fin')
+        logging.info('START')
+        typer.run(main)
+        logging.info('END')
         sys.exit(0)
     except Exception as e:
         logging.error(str(e), exc_info=True)

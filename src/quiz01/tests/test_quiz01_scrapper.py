@@ -2,7 +2,7 @@
 
 # import pytest
 # import src.quiz01_scrapper
-from .. import quiz01_scrapper
+from .. import quiz01_scraper
 # from src.quiz01_scrapper import _analyze_feedback_question, main
 
 
@@ -17,11 +17,11 @@ def test_analyze_feedback_question(monkeypatch):
     feedback = None
 
     monkeypatch.setattr(
-        quiz01_scrapper,
+        quiz01_scraper,
         "_analyze_feedback_question",
         lambda x: string1, string2
     )
-    assert quiz01_scrapper._analyze_feedback_question(
+    assert quiz01_scraper._analyze_feedback_question(
         feedback) == string1, string2
 
 
@@ -36,7 +36,7 @@ def test_analyze_feedback_question(monkeypatch):
 def test_main():
     """_summary_."""
     try:
-        quiz01_scrapper.do_scrapping()
+        quiz01_scraper.do_scraping()
     except Exception:
         pass
 
@@ -48,11 +48,11 @@ def test_main_mokeyed(monkeypatch):
         monkeypatch (_type_): _description_
     """
     monkeypatch.setattr(
-        quiz01_scrapper,
+        quiz01_scraper,
         "do_scrapping",
         lambda: None
     )
-    assert quiz01_scrapper.do_scrapping() is None
+    assert quiz01_scraper.do_scraping() is None
 
 
 ###############

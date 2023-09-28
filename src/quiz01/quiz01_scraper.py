@@ -3,12 +3,13 @@
 Returns:
     _type_: _description_
 """
-import argparse
+# import argparse
 import configparser
-import datetime
 import logging
 import os
 import uuid
+from typing import List  # , Optional
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -16,11 +17,12 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from .quiz01_api import Quiz01Service, Quiz01ServiceFromClient
 from swagger_client import QuestionModel
-from typing import List  # , Optional
 
-STARS_SEPARATOR = '***************'
+from . import config
+from .quiz01_api import Quiz01Service, Quiz01ServiceFromClient
+from .quiz01_util import log_method_call
+
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
 STR_NOT = 'NOT'
@@ -28,7 +30,6 @@ RADIO = 'RADIO'
 CHECK = 'CHECK'
 RADIO_BOOL = 'RADIO_BOOL'
 EW = 20  # EW stands for explicit_wait
-currentDT: datetime.datetime = datetime.datetime.now()
 XPATH_1ST_BTN = (
     '//*[@id="app"]/ion-app/div/div[1]/ion-content/div/div[3]/ion-button')
 XPATH_2ND_BTN = (
@@ -55,14 +56,14 @@ class EnvInterpolation(configparser.BasicInterpolation):
         return os.path.expandvars(value)
 
 
-config = configparser.ConfigParser(interpolation=EnvInterpolation())
+ini = configparser.ConfigParser(interpolation=EnvInterpolation())
 # config = configparser.ConfigParser()
 # config = configparser.ConfigParser(os.environ)
 # config = configparser.ConfigParser(
 #     os.environ,
 #     interpolation=configparser.ExtendedInterpolation())
 # config = configparser.SafeConfigParser(os.environ)
-config.read('config.ini')
+ini.read('config.ini')
 
 
 def _click(driver, xpath: str):
@@ -151,7 +152,7 @@ def _process_feeback_ticks(
         logging.info(f_answer_ok_text)
         if p_flag_batch:
             if p_flag_dont_override:
-                stored_data = p_obj_service.get_cache()
+                stored_data = p_obj_service.get_cache(exam_number)
                 filtered_data = list(filter(
                     lambda i:
                         i['id'] == p_question_text and
@@ -171,36 +172,25 @@ def _process_feeback_ticks(
                     answer_text=f_answer_ok_text,
                     is_correct=p_flag_correct,
                     exam_number=p_exam_number,
-                    last_modified=currentDT.isoformat()))
+                    last_modified=config.currentDT.isoformat()))
         else:
             p_obj_service.put(
                 f'{p_question_text}---{f_answer_ok_text}',
                 p_question_text, p_type, f_answer_ok_text,
-                p_flag_correct, p_exam_number, currentDT.isoformat())
+                p_flag_correct, p_exam_number, config.currentDT.isoformat())
 
 
-def do_scrapping(*args):
+@log_method_call
+def do_scraping(p_exam_number: int):
     """Main method."""
-    parser = argparse.ArgumentParser(description='Scraper0X')
-    parser.add_argument(
-        '-n',
-        '--examnumber',
-        required=False,
-        help=('Parametro para decidir que examen ejecutar. '
-              'Dejarlo vacio usa el default del config.ini'),
-        default=1)
-    my_args = parser.parse_args(args)
-    logging.info(f'{STARS_SEPARATOR} PARAMETROS DE ENTRADA => '
-                 f'--examnumber:{my_args.examnumber}'
-                 f' {STARS_SEPARATOR}')
-    exam_number = my_args.examnumber
-
+    global exam_number
+    exam_number = p_exam_number
     exam_section = f'EXAM-{exam_number}'
-    quiz_url = config[exam_section]['quiz_url']
-    x_api_key = config[exam_section]['x-api-key']
-    api_put = config[exam_section]['api_put']
-    api_search = config[exam_section]['api_search']
-    api_endpoint = config[exam_section]['api_endpoint']
+    quiz_url = ini[exam_section]['quiz_url']
+    x_api_key = ini[exam_section]['x-api-key']
+    api_put = ini[exam_section]['api_put']
+    api_search = ini[exam_section]['api_search']
+    api_endpoint = ini[exam_section]['api_endpoint']
     obj_service: Quiz01Service = Quiz01ServiceFromClient(
         x_api_key,
         api_endpoint
@@ -210,13 +200,13 @@ def do_scrapping(*args):
     print(f'v_uuid->{v_uuid}')
     logging.info(f'v_uuid->{v_uuid}')
 
-    driver_location = config['DEFAULT']['driver_location']
-    binary_location = config['DEFAULT']['binary_location']
-    headless = config.getboolean('DEFAULT', 'headless')
-    do_correct_answers = config.getboolean('DEFAULT', 'do_correct_answers')
-    do_correct_answers_cache = config.getboolean(
+    driver_location = ini['DEFAULT']['driver_location']
+    binary_location = ini['DEFAULT']['binary_location']
+    headless = ini.getboolean('DEFAULT', 'headless')
+    do_correct_answers = ini.getboolean('DEFAULT', 'do_correct_answers')
+    do_correct_answers_cache = ini.getboolean(
         'DEFAULT', 'do_correct_answers_cache')
-    dont_override = config.getboolean('DEFAULT', 'dont_override')
+    dont_override = ini.getboolean('DEFAULT', 'dont_override')
 
     service = Service(driver_location)
     options = Options()
@@ -295,12 +285,12 @@ def do_scrapping(*args):
             _mark_dom_answers(driver, scraped_answers_to_choose)
         elif do_correct_answers and do_correct_answers_cache:
             logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
-            stored_data = obj_service.get_cache()
+            stored_data = obj_service.get_cache(exam_number)
             filtered_data = list(filter(
                 lambda i: i['id'] == div_question_text and i['is_correct'],
                 stored_data['Items']))
 
-            # IMPROVE THIS BUCLE
+            # TODO IMPROVE THIS BUCLE
             # 1 -> the stored answers COULd be the 2 last of the list
             # 2 -> the stored answer could be non existant
             if filtered_data:
@@ -442,3 +432,9 @@ def do_scrapping(*args):
         obj_service.put_batch(lista_put)
     # obj_service.end_connection()
     driver.quit()  # driver.close()
+
+
+# if __name__ == "__main__":
+#     logging.info('START')
+#     do_scraping(1)
+#     logging.info('END')
