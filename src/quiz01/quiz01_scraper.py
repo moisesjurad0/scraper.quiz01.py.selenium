@@ -112,7 +112,7 @@ def _analyze_feedback_question(feedback) -> tuple:  # tuple[str, str]:
         except Exception as e2:
             logging.error(str(e2), exc_info=True)
 
-    return str_input_type, str_question
+    return str_input_type, str_question.strip().replace('\xa0', ' ')  # FIXED
 
 
 def _mark_dom_answers(driver, scrapped_answers_to_choose):
@@ -148,6 +148,8 @@ def _process_feeback_ticks(
             f_answer_ok_text = (
                 tick.previous_sibling.next_element.next_element.
                 next_element.next_element.next_element.next_element.text)
+
+        f_answer_ok_text = f_answer_ok_text.strip()  # FIXED
         print(f_answer_ok_text)
         logging.info(f_answer_ok_text)
         if p_flag_batch:
@@ -269,6 +271,8 @@ def do_scraping(p_exam_number: int):
                                                  )).text.split("\n")[0]
             if div_question_text.startswith(STR_TOFCS):
                 div_question_text = div_question_text.split(STR_TOFCS)[1]
+
+            div_question_text = div_question_text.strip().replace('\xa0', ' ')  # FIXED
             print(div_question_text)
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located(
@@ -288,10 +292,12 @@ def do_scraping(p_exam_number: int):
             logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
             stored_data = obj_service.get_cache(exam_number)
             filtered_data = list(filter(
-                lambda i: i['id'] == div_question_text and i['is_correct'],
+                lambda i:
+                i['id'] == div_question_text and
+                i['is_correct'],
                 stored_data['Items']))
 
-            # TODO IMPROVE THIS BUCLE
+            # DONE | IMPROVE THIS BUCLE | YA NO
             # 1 -> the stored answers COULd be the 2 last of the list
             # 2 -> the stored answer could be non existant
             if filtered_data:
@@ -434,9 +440,3 @@ def do_scraping(p_exam_number: int):
         print('ITEMS WERE NOT BATCHED')
 
     driver.quit()
-
-
-# if __name__ == "__main__":
-#     logging.info('START')
-#     do_scraping(1)
-#     logging.info('END')
