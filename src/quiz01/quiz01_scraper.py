@@ -207,6 +207,7 @@ def do_scraping(p_exam_number: int):
     do_correct_answers_cache = ini.getboolean(
         'DEFAULT', 'do_correct_answers_cache')
     dont_override = ini.getboolean('DEFAULT', 'dont_override')
+    dont_store_answers = ini.getboolean('DEFAULT', 'dont_store_answers')
 
     service = Service(driver_location)
     options = Options()
@@ -391,7 +392,7 @@ def do_scraping(p_exam_number: int):
         logging.info(f'Q{contador_preguntas} - {f_question_text}')
 
         correct_ticks = feedback.select(
-            '.circular-tick, .circular-tick-holo')
+            '.circular-tick,.circular-tick-holo')
         _process_feeback_ticks(
             correct_ticks,
             exam_number,
@@ -402,13 +403,11 @@ def do_scraping(p_exam_number: int):
             dont_override,
             True,
             lista_put)
-        # OTRAS MANERAS DE INVOCAR EL SELECTOR
-        # correctos = feedback.find_all_next(
-        #      'ion-icon', class_='circular-tick-holo')
 
         incorrect_ticks = feedback.select(
-            'ion-icon[class="icon icon-correct md hydrated"]'
-            ':not(.circular-tick-holo,.circular-tick)')  # v4
+            'ion-icon.icon.icon-correct.md.hydrated'
+            ':not(.circular-tick-holo)'
+            ':not(.circular-tick)')
         _process_feeback_ticks(
             incorrect_ticks,
             exam_number,
@@ -419,19 +418,22 @@ def do_scraping(p_exam_number: int):
             dont_override,
             True,
             lista_put)
-        # OTRAS MANERAS DE INVOCAR EL SELECTOR
-        # v0#'circular-x' #para los incorrectos
-        # v1#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
-        # v2#feedback.select('ion-icon:not(.circular-tick-holo,.circular-tick)')
-        # v3#feedback.select('ion-icon[class="icon icon-correct md hydrated"]')
-        #   .select('ion-icon:not(.circular-tick-holo,.circular-tick)')
 
         print(f'Q{contador_preguntas} - END')
         logging.info(f'Q{contador_preguntas} - END')
-    if lista_put:
+
+    print(f'ITEMS ({len(lista_put)}) READY TO BATCH')
+
+    if dont_store_answers:
+        print('ITEMS ARE NOT GONNA BE BATCH')
+
+    if lista_put and not dont_store_answers:
+        print('BATCHING ITEMS')
         obj_service.put_batch(lista_put)
-    # obj_service.end_connection()
-    driver.quit()  # driver.close()
+    else:
+        print('ITEMS WERE NOT BATCHED')
+
+    driver.quit()
 
 
 # if __name__ == "__main__":
