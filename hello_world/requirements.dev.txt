@@ -1,15 +1,22 @@
+# cmake
 beautifulsoup4==4.11.2 # bs4
 selenium==4.8.2
 requests==2.27.1
 #lxml
-#-e ./python-client-generated/
-#swagger_client
-#swagger-client
-#swaggerpy
+tox
+pytest
+pytest-cov
+flake8
+flake8-docstrings
+mypy
+#lxml
+types-requests
+types-beautifulsoup4
 ./python-client-generated/
+isort
 typer
 rich
 fastapi>=0.68.0,<0.69.0
 pydantic>=1.8.0,<2.0.0
 uvicorn>=0.15.0,<0.16.0
-psutil
+mangum

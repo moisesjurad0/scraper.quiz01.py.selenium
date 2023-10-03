@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "donjayamanne.python-extension-pack",
+        "ms-python.mypy-type-checker",
+        "ms-python.isort",
+        "amazonwebservices.aws-toolkit-vscode"
+    ]
+}

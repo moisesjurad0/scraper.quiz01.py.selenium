@@ -1,0 +1,8 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "quiz01-scraper-BOT-stk2"
+resolve_s3 = true
+s3_prefix = "quiz01-scraper-BOT-stk2"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = ["HelloWorldFunction=572867055940.dkr.ecr.us-east-1.amazonaws.com/quiz01scraperbotstk2c298558a/helloworldfunction19d43fc4repo"]

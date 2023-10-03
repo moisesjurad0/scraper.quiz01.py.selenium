@@ -211,7 +211,6 @@ def do_scraping(p_exam_number: int):
     dont_override = ini.getboolean('DEFAULT', 'dont_override')
     dont_store_answers = ini.getboolean('DEFAULT', 'dont_store_answers')
 
-    service = Service(driver_location)
     options = Options()
     options.binary_location = binary_location
     # ua = UserAgent()
@@ -242,6 +241,7 @@ def do_scraping(p_exam_number: int):
     options.add_experimental_option("useAutomationExtension", False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
+    service = Service(driver_location)
     # Create new Instance of Navigator
     driver = webdriver.Chrome(service=service, options=options)
     driver.get(quiz_url)

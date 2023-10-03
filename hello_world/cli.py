@@ -15,7 +15,7 @@ log_folder.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     filename=log_folder /
-    f'quiz01scraper.api{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
+    f'quiz01scraper.cli.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
     level=logging.INFO,
     format=(
         '%(asctime)s | %(name)s | %(levelname)s |'

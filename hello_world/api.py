@@ -7,24 +7,28 @@ from pathlib import Path
 import uvicorn
 from fastapi import Depends, FastAPI  # , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
+from mangum import Mangum
 from quiz01 import config, quiz01_scraper
 
 # from fastapi.encoders import jsonable_encoder
 # from fastapi.responses import JSONResponse
 
-script_path = Path(__file__).absolute()
-script_dir = Path(__file__).parent.absolute()
-log_folder = script_dir / 'logs'
-log_folder.mkdir(parents=True, exist_ok=True)
+if True:
+    logger = logging.getLogger('quiz01scraperBOTAPI')
+    logger.setLevel(logging.INFO)
+else:
+    script_path = Path(__file__).absolute()
+    script_dir = Path(__file__).parent.absolute()
+    log_folder = script_dir / 'logs'
+    log_folder.mkdir(parents=True, exist_ok=True)
 
-logging.basicConfig(
-    filename=log_folder /
-    f'quiz01scraper.api{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
-    level=logging.INFO,
-    format=(
-        '%(asctime)s | %(name)s | %(levelname)s |'
-        ' [%(filename)s:%(lineno)d] | %(message)s'))
+    logging.basicConfig(
+        filename=log_folder /
+        f'quiz01scraper.api.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
+        level=logging.INFO,
+        format=(
+            '%(asctime)s | %(name)s | %(levelname)s |'
+            ' [%(filename)s:%(lineno)d] | %(message)s'))
 
 
 description = """
@@ -47,7 +51,7 @@ app = FastAPI(
         "url": "https://linktr.ee/moisesjurad0",
 
     },
-    # root_path=f'/Prod'
+    root_path='/Prod'
 )
 
 app.add_middleware(
@@ -61,6 +65,8 @@ sessions = {}
 
 
 @app.get("/")
+@app.get("/test")
+@app.get("/ok")
 def read_root():
     """Funcion que devuelve un estado plano OK definido para prueba simple."""
     return {"API_status": "OK"}
@@ -139,6 +145,8 @@ def main(exam_number: int, session_id: int = Depends(get_session_id)):
     logging.info('m01.END')
     print('m01.END')
 
+
+handler = Mangum(app)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
