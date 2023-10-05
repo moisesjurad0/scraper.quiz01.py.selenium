@@ -1,5 +1,5 @@
 FROM squartle/python-chromium
-EXPOSE 8000
+EXPOSE 80
 # FROM docker.pkg.github.com/moisesjurad0/docker-python-chromium/python-chromium
 # FROM ghcr.io/moisesjurad0/python-chromium
 
@@ -26,14 +26,20 @@ EXPOSE 8000
 #   que he puesto más arriba.
 
 WORKDIR /myapp
-COPY requirements.txt .
+RUN python -m pip install --upgrade pip
+COPY requirements.txt src ./
+# copia los contenidos de la carpeta hacia adentro de la carpeta seleccionada
+COPY python-client-generated ./python-client-generated
+#COPY requirements.txt src python-client-generated ./
+#COPY . .
 RUN pip --no-cache-dir install -r requirements.txt
+# && \ rm -rf python-client-generated
 
 # esto es para actualizar el selenium3 hacia el 4 si es que no le hubieras puesto version en el requirements o si estuviera la versión3 instalada.
 # RUN pip --no-cache-dir install -r requirements.txt --upgrade
 
 # COPY ./src/* .
-COPY src .
 
 # CMD [ "python", "scrap01.py" ]
-CMD [uvicorn api:app]
+# CMD uvicorn api:app --reload
+CMD python -m uvicorn api:app --host 0.0.0.0 --port 80

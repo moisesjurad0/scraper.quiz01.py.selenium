@@ -3,9 +3,9 @@ services:
 
   scrapper1:
     build: .
-    image: moisesjurad0/tmp.quiz01scraper.BOT
+    image: moisesjurad0/tmp.quiz01scraper.bot
     #image: ghcr.io/moisesjurad0/scrapper-1
     env_file: .env
     tty: true
     ports:
-      - 8000:8000
+      - 80:80

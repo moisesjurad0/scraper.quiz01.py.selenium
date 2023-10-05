@@ -1,7 +1,8 @@
 """Modulo Util con decorator para logs."""
-from functools import wraps
+import functools
 import logging
 import os
+import threading
 import time
 
 
@@ -163,3 +164,22 @@ def set_default_logger():
     logger = logging.getLogger(__name__)
     logger.debug(
         f"************* logging set for Lambda {os.getenv('AWS_LAMBDA_FUNCTION_NAME') } *************")
+
+
+def threaded(func):
+    """Decorator to automatically launch a function in a thread.
+
+    Args:
+        func (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    # https://stackoverflow.com/questions/67071870/python-make-a-function-always-use-a-thread-without-calling-thread-start
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):  # replaces original function...
+        # ...and launches the original in a thread
+        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
+        return thread
+    return wrapper

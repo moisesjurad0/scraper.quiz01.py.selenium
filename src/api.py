@@ -11,7 +11,6 @@ from pathlib import Path
 import uvicorn
 from fastapi import Depends, FastAPI  # , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
 
 from quiz01 import config, quiz01_scraper, quiz01_util
 
@@ -95,7 +94,7 @@ def run(exam_number: ExamNumberEnumModel,
     Returns:
         _type_: _description_
     """
-    logging.info('run-START')
+    logging.info('START --> run')
     STR_MESSAGE = 'message'
     retorno = None
     flag_busy = False
@@ -110,21 +109,30 @@ def run(exam_number: ExamNumberEnumModel,
             "session_id": session_id,
             "start_time": datetime.datetime.now()}
 
-        try:
-            threading.Thread(
-                target=quiz01_scraper.do_scraping,
-                args=(exam_number.value,)
-            ).start()
-        except Exception as e:
-            logging.error(str(e), exc_info=True)
-            retorno = {STR_MESSAGE: str(e)}
+        run_bot_thread(exam_number)
+        retorno = {STR_MESSAGE: 'task queued..'}
 
-        sessions.pop(exam_number.value)
-        retorno = {STR_MESSAGE: 'Evaluating task in the background'}
-        # retorno = {STR_MESSAGE: "Task finished"}
-
-    logging.info('run-END')
+    logging.info('END --> run')
     return retorno
+
+
+@quiz01_util.threaded
+def run_bot_thread(exam_number: ExamNumberEnumModel):
+    """_summary_.
+
+    Args:
+        exam_number (ExamNumberEnumModel): _description_
+    """
+    logging.info('START --> run_bot_thread')
+    try:
+        quiz01_scraper.do_scraping(exam_number.value)
+    except Exception as e:
+        logging.error(str(e), exc_info=True)
+        print(e)
+    finally:
+        # this line should be in the async env, that's why the method
+        sessions.pop(exam_number.value)
+    logging.info('END --> run_bot_thread')
 
 
 @app.get("/check/")
@@ -137,10 +145,8 @@ def check():
     Returns:
         _type_: _description_
     """
-    return sessions
+    return {'sessions': sessions}
 
-
-handler = Mangum(app)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

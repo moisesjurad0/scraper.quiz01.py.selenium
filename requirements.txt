@@ -1,16 +1,10 @@
-beautifulsoup4==4.11.2 # bs4
+beautifulsoup4==4.11.2
 selenium==4.8.2
 requests==2.27.1
-#lxml
-#-e ./python-client-generated/
-#swagger_client
-#swagger-client
-#swaggerpy
+# -e ./python-client-generated/
 ./python-client-generated/
 typer
 rich
 fastapi>=0.68.0,<0.69.0
 pydantic>=1.8.0,<2.0.0
 uvicorn>=0.15.0,<0.16.0
-psutil
-mangum
