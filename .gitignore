@@ -247,3 +247,4 @@ $RECYCLE.BIN/
 logs/
 **/*.log
 .reports/
+.env.*

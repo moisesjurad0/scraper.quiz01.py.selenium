@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/src/",
-            "envFile": "${workspaceFolder}/.env",
+            "envFile": "${workspaceFolder}/.env.local",
             "args": [
                 "1"
             ]
