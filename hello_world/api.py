@@ -1,34 +1,53 @@
 """main script module without package."""
 import datetime
 import logging
-import threading
+import uuid
+# import time
 from pathlib import Path
 
 import uvicorn
 from fastapi import Depends, FastAPI  # , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-from quiz01 import config, quiz01_scraper
+from quiz01 import config, quiz01_scraper, quiz01_util
 
-# from fastapi.encoders import jsonable_encoder
-# from fastapi.responses import JSONResponse
+import os
+os.environ["USE_MULTIPROCESSING"] = "False"
 
-if True:
-    logger = logging.getLogger('quiz01scraperBOTAPI')
-    logger.setLevel(logging.INFO)
-else:
-    script_path = Path(__file__).absolute()
-    script_dir = Path(__file__).parent.absolute()
-    log_folder = script_dir / 'logs'
-    log_folder.mkdir(parents=True, exist_ok=True)
+default_log_args = {
+    'level': logging.INFO,
+    'format': '[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(module)s] [%(funcName)s] [L%(lineno)d] [P%(process)d] [T%(thread)d] %(message)s',
+    'datefmt': '%Y-%m-%d %H:%M:%S',
+    'force': True,
+}
+logging.basicConfig(**default_log_args)
 
-    logging.basicConfig(
-        filename=log_folder /
-        f'quiz01scraper.api.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
-        level=logging.INFO,
-        format=(
-            '%(asctime)s | %(name)s | %(levelname)s |'
-            ' [%(filename)s:%(lineno)d] | %(message)s'))
+
+# quiz01_util.set_default_logger()
+# logger = quiz01_util.getLog(__name__)
+
+# # https://stackoverflow.com/questions/37703609/using-python-logging-with-aws-lambda
+# if len(logging.getLogger().handlers) > 0:
+#     # The Lambda environment pre-configures a handler logging to stderr. If a handler is already configured,
+#     # `.basicConfig` does not execute. Thus we set the level directly.
+#     logging.getLogger().setLevel(logging.INFO)
+#     formatter = logging.Formatter('%(levelname)s|%(name)s|%(asctime)s|'
+#                                   '%(filename)s:%(lineno)d|%(message)s')
+#     logging.getLogger().handlers[0].setFormatter(formatter)
+# else:
+#     # logging.basicConfig(level=logging.INFO)
+#     script_path = Path(__file__).absolute()
+#     script_dir = Path(__file__).parent.absolute()
+#     log_folder = script_dir / 'logs'
+#     log_folder.mkdir(parents=True, exist_ok=True)
+
+#     logging.basicConfig(
+#         level=logging.INFO,
+#         format=('%(levelname)s|%(name)s|%(asctime)s|'
+#                 '%(filename)s:%(lineno)d|%(message)s'),
+#         filename=log_folder /
+#         f'quiz01scraper.api.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
+#     )
 
 
 description = """
@@ -65,10 +84,9 @@ sessions = {}
 
 
 @app.get("/")
-@app.get("/test")
 @app.get("/ok")
-def read_root():
-    """Funcion que devuelve un estado plano OK definido para prueba simple."""
+def root():
+    """Funcion que devuelve un estado plano OK deloggerfinido para prueba simple."""
     return {"API_status": "OK"}
 
 
@@ -78,11 +96,11 @@ def get_session_id():
     Returns:
         _type_: _description_
     """
-    return threading.current_thread().ident
+    return uuid.uuid4().hex
 
 
 @app.post("/run/{exam_number}")
-def run(exam_number: int, session_id: int = Depends(get_session_id)):
+def run(exam_number: int):
     """Run the bot.
 
     Args:
@@ -94,12 +112,34 @@ def run(exam_number: int, session_id: int = Depends(get_session_id)):
     print('run-start')
     logging.info('run-start')
 
-    hilo = threading.Thread(target=main, args=(exam_number,))
-    hilo.start()
+    # hilo = threading.Thread(target=main, args=(exam_number,))
+    # hilo.start()
+    try:
+        retorno = main(exam_number)
+    except Exception as e:
+        logging.error(str(e), exc_info=True)
+        retorno = 'm01.ERROR'
 
     print('run-ending')
     logging.info('run-ending')
-    return {"message": "Evaluating task in the background"}
+    return {"message": retorno}
+
+
+@app.post("/test/")
+def run_test():
+    """Run the bot.
+
+    Returns:
+        _type_: _description_
+    """
+    print('run_test-start')
+    logging.info('run_test-start')
+
+    retorno = quiz01_scraper.iki()
+
+    print('run_test-ending')
+    logging.info('run_test-ending')
+    return {"message": retorno}
 
 
 @app.get("/check/")
@@ -122,28 +162,43 @@ def main(exam_number: int, session_id: int = Depends(get_session_id)):
         exam_number (int): Parametro para decidir que examen ejecutar. Dejarlo vacio usa el default del config.ini. Defaults to 1.
         session_id (int, optional): _description_. Defaults to Depends(get_session_id).
     """
+    retorno = None
+    flag_busy = False
     logging.info('m01.START')
     print('m01.START')
 
-    sessions[exam_number] = {
-        "session_id": session_id,
-        "start_time": datetime.datetime.now()}
+    if sessions:
+        if sessions[exam_number]:
+            retorno = {"message": "Task alredy executing/busy"}
+            flag_busy = True
 
-    # test 1
-    quiz01_scraper.do_scraping(exam_number)
+    if not flag_busy:
+        sessions[exam_number] = {
+            "session_id": session_id,
+            "start_time": datetime.datetime.now()}
 
-    # test 2
-    # import time
-    # time.sleep(60)
+        quiz01_scraper.do_scraping(exam_number)
 
-    # test 3
-    # for i in range(10):
-    #     print(f'subtarea {i}')
+        # test 4 - OK
+        # retorno = quiz01_scraper.iki()
 
-    sessions.pop(exam_number)
+        # test 3
+        # for i in range(10):
+        #     print(f'subtarea {i}')
+
+        # test 2
+        # import time
+        # time.sleep(60)
+
+        # test 1
+        # time.sleep(15)
+
+        sessions.pop(exam_number)
+        retorno = {"message": "Task finished"}
 
     logging.info('m01.END')
     print('m01.END')
+    return retorno
 
 
 handler = Mangum(app)

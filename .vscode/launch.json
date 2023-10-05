@@ -8,10 +8,10 @@
             "name": "m01.main.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/main.py",
+            "program": "${workspaceFolder}/hello_world/api.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/src/",
+            "cwd": "${workspaceFolder}/hello_world/",
             "envFile": "${workspaceFolder}/.env",
             "args": [
                 "1"

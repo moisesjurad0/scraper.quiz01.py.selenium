@@ -8,11 +8,11 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 600
     Environment:
       Variables:
-        SCRAP01_DRIVER_LOCATION: /usr/bin/chromedriver
-        SCRAP01_BINARY_LOCATION: /usr/bin/chromium-browser
+        SCRAP01_DRIVER_LOCATION: /opt/chromedriver
+        SCRAP01_BINARY_LOCATION: /opt/chrome/chrome
         SCRAP01_QUIZ_URL_1: https://www.classmarker.com/online-test/start/?quiz=ncp5fac7839db8a1
         SCRAP01_API_KEY_1: eO8qdLLxsmRhc1OeKoFg9evcXyXetXwyo3N7ywf0
         SCRAP01_API_PUT_1: https://l8kpe9zcse.execute-api.us-east-1.amazonaws.com/Prod/quiz01

@@ -3,11 +3,11 @@
 Returns:
     _type_: _description_
 """
-# import argparse
 import configparser
 import logging
 import os
 import uuid
+from tempfile import mkdtemp
 from typing import List  # , Optional
 
 from bs4 import BeautifulSoup
@@ -21,7 +21,12 @@ from swagger_client import QuestionModel
 
 from . import config
 from .quiz01_api import Quiz01Service, Quiz01ServiceFromClient
-from .quiz01_util import log_method_call
+from .quiz01_util import log_method_call, getLog
+
+# logger = logging.getLogger('quiz01scraperBOTAPI')
+# logging.setLevel(logging.INFO)
+
+# logger = getLog(__name__)
 
 STR_TOFC = 'True or False:'
 STR_TOFCS = 'True or False: '
@@ -182,7 +187,7 @@ def _process_feeback_ticks(
                 p_flag_correct, p_exam_number, config.currentDT.isoformat())
 
 
-@log_method_call
+# @log_method_call
 def do_scraping(p_exam_number: int):
     """Main method."""
     global exam_number
@@ -197,11 +202,12 @@ def do_scraping(p_exam_number: int):
         x_api_key,
         api_endpoint
     )
-
+    print('200')
+    logging.info('201')
     v_uuid = uuid.uuid4().hex
     print(f'v_uuid->{v_uuid}')
     logging.info(f'v_uuid->{v_uuid}')
-
+    logging.info('205')
     driver_location = ini['DEFAULT']['driver_location']
     binary_location = ini['DEFAULT']['binary_location']
     headless = ini.getboolean('DEFAULT', 'headless')
@@ -211,40 +217,31 @@ def do_scraping(p_exam_number: int):
     dont_override = ini.getboolean('DEFAULT', 'dont_override')
     dont_store_answers = ini.getboolean('DEFAULT', 'dont_store_answers')
 
+    logging.info('215')
+
     options = Options()
     options.binary_location = binary_location
-    # ua = UserAgent()
-    # userAgent = ua.random
-    # log.info(userAgent)
-    # opts_chrome.add_argument(f'user-agent={userAgent}')
-    # opts_chrome.add_argument(
-    #     'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-    #     'AppleWebKit/537.36 (KHTML, like Gecko) '
-    #     'Chrome/80.0.3987.149 Safari/537.36')
-    if headless:
-        options.add_argument("--headless")
-        # options.add_argument("--start-maximized")
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument('--no-sandbox')
-    else:
-        options.add_argument("--start-fullscreen")  # or with --
-    # options.add_argument("start-maximized")
-    options.add_argument("--incognito")  # or without --
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1280x1696")
+    options.add_argument("--single-process")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-tools")
+    options.add_argument("--no-zygote")
+    options.add_argument(f"--user-data-dir={mkdtemp()}")
+    options.add_argument(f"--data-path={mkdtemp()}")
+    options.add_argument(f"--disk-cache-dir={mkdtemp()}")
+    options.add_argument("--remote-debugging-port=9222")
 
-    # not working on latest versions of driver
-    # options.add_argument("--disable-infobars")
-    # options.add_argument("--disable-extensions")
-    options.add_argument("allow-insecure-localhost")
-    options.add_argument("ignore-ssl-errors=yes")
-    options.add_argument("ignore-certificate-errors")
-    options.add_argument("--log-level=3")
-    options.add_experimental_option("useAutomationExtension", False)
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    logging.info('232')
 
     service = Service(driver_location)
-    # Create new Instance of Navigator
+    logging.info('235')
     driver = webdriver.Chrome(service=service, options=options)
+    logging.info('237')
     driver.get(quiz_url)
+    logging.info('239')
 
     # page_source = driver.page_source
 
@@ -255,17 +252,23 @@ def do_scraping(p_exam_number: int):
     # default is zero
     # driver.implicitly_wait(implicitly_wait)
 
+    logging.info('250')
     _click(driver, XPATH_1ST_BTN)  # press 1st button Next
+    logging.info('252')
     _click(driver, XPATH_2ND_BTN)  # press 2nd button Next
+    logging.info('254')
 
     logging.info('SECTION - ANSWERING QUESTIONS')
     while True:
         try:
+            logging.info('259')
             WebDriverWait(driver, 3).until_not(
                 EC.visibility_of_element_located((By.XPATH, XPATH_ANSW_Q_DIV)))
         except Exception as ex1:
-            logging.error(str(ex1), exc_info=True)
+            logging.info('263')
+            logging.warning(str(ex1), exc_info=True)
         finally:
+            logging.info('266')
             div_question_text = WebDriverWait(driver, EW).until(
                 EC.visibility_of_element_located((By.XPATH, XPATH_ANSW_Q_DIV)
                                                  )).text.split("\n")[0]
@@ -274,6 +277,7 @@ def do_scraping(p_exam_number: int):
 
             div_question_text = div_question_text.strip().replace('\xa0', ' ')  # FIXED
             print(div_question_text)
+            logging.info('275')
 
         # WebDriverWait(driver, ew).until(EC.invisibility_of_element_located(
             # (By.XPATH, XPATH_ANSW_Q_DIV)))
@@ -282,8 +286,11 @@ def do_scraping(p_exam_number: int):
         # print(div_question.text)
 
         # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
+        logging.info('284')
         scraped_answers_to_choose = driver.find_elements(
             By.XPATH, XPATH_ANSW_Q_CHEK_RADI)
+
+        logging.info('288')
 
         if not do_correct_answers:
             logging.info('SECTION - DUMMY ANSWERS')
@@ -440,3 +447,32 @@ def do_scraping(p_exam_number: int):
         print('ITEMS WERE NOT BATCHED')
 
     driver.quit()
+
+
+def iki():
+    """Metodo de prueba de la imagen con nombre raro.
+
+    Returns:
+        _type_: _description_
+    """
+    options = Options()
+    service = Service("/opt/chromedriver")
+
+    options.binary_location = '/opt/chrome/chrome'
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1280x1696")
+    options.add_argument("--single-process")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-tools")
+    options.add_argument("--no-zygote")
+    options.add_argument(f"--user-data-dir={mkdtemp()}")
+    options.add_argument(f"--data-path={mkdtemp()}")
+    options.add_argument(f"--disk-cache-dir={mkdtemp()}")
+    options.add_argument("--remote-debugging-port=9222")
+
+    chrome = webdriver.Chrome(options=options, service=service)
+    chrome.get("https://example.com/")
+
+    return chrome.find_element(by=By.XPATH, value="//html").text
