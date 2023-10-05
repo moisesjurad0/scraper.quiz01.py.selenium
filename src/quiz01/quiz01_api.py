@@ -1,5 +1,6 @@
 """Modulo de llamado al API."""
 import json
+import logging
 from pprint import pprint
 from typing import List
 
@@ -7,7 +8,7 @@ import requests
 import swagger_client
 from swagger_client.rest import ApiException
 
-from .quiz01_util import log_method_call, log_method_call_no_params
+from .quiz01_util import getLog, log_method_call, log_method_call_no_params
 
 
 class Quiz01Service:
@@ -187,18 +188,11 @@ class Quiz01ServiceFromClient(Quiz01Service):
         Returns:
             _type_: _description_
         """
-        # if self.cache:
         if exam_number not in self.cache:
             body = swagger_client.QuestionScanModel(
                 exam_number=exam_number)
-            try:
-                self.cache[exam_number] = self._get_api_instance(
-                ).search_items_begins_with_api_v1_questions_search_begins_with_post(body)
-                # pprint(api_response)
-            except ApiException as exception:
-                print(
-                    "Exception when calling QuestionsApi->search_items_api_v1_questions_contains_post: %s\n" %
-                    exception)
+            self.cache[exam_number] = self._get_api_instance(
+            ).search_items_begins_with_api_v1_questions_search_begins_with_post(body)
         return self.cache[exam_number]
 
     @log_method_call
@@ -232,24 +226,10 @@ class Quiz01ServiceFromClient(Quiz01Service):
             is_correct=flag_correct,
             exam_number=exam_number,
             last_modified=last_modify
-        )  # Question |
-
-        try:
-            # Put Item
-            api_response = self._get_api_instance().put_item_api_v1_questions_put(
-                body)
-            pprint(api_response)
-            return api_response
-        except ApiException as exception:
-            print(
-                "Exception when calling QuestionsApi->"
-                "put_item_api_v1_questions_put: %s\n" %
-                exception)
-            return None
-
-        # response = requests.request("POST", self.put_url, headers=headers, data=payload)
-        # response.raise_for_status()
-        # return response.json()|
+        )
+        response = self._get_api_instance().put_item_api_v1_questions_put(
+            body)
+        return response
 
     @log_method_call_no_params
     def put_batch(
@@ -265,19 +245,9 @@ class Quiz01ServiceFromClient(Quiz01Service):
             _type_: _description_
         """
         body = my_list
-
-        try:
-            # Put Item
-            api_response = self._get_api_instance(
-            ).batch_put_items_api_v1_questions_batch_put(body)
-            pprint(api_response)
-            return api_response
-        except ApiException as exception:
-            print(
-                "Exception when calling QuestionsApi->"
-                "put_item_api_v1_questions_put: %s\n" %
-                exception)
-            return None
+        response = self._get_api_instance(
+        ).batch_put_items_api_v1_questions_batch_put(body)
+        return response
 
     @log_method_call
     def search_v2(
@@ -299,46 +269,16 @@ class Quiz01ServiceFromClient(Quiz01Service):
         Returns:
             _type_: _description_
         """
-        # payload = json.dumps({
-        #     "question": question,
-        #     "question_type": question_type,
-        #     "answer": answer,
-        #     "correct": flag_correct,
-        #     "exam_number": exam_number
-        # })
-        # headers = {
-        #     'x-api-key': self.x_api_key,
-        #     'Content-Type': 'application/json'
-        # }
-
-        # response = requests.request(
-        #     "POST", self.search_url, headers=headers, data=payload)
-
-        # response.raise_for_status()
-        # return response.json()
-
-        # create an instance of the API class
-
         body = swagger_client.QuestionScanModel(
             id=question,
             question_type=question_type,
             answer_text=answer,
             is_correct=flag_correct,
             exam_number=exam_number
-        )  # QuestionQuery |
-
-        try:
-            # Search Items
-            api_response = self._get_api_instance(
-            ).search_items_begins_with_api_v1_questions_search_begins_with_post(body)
-            pprint(api_response)
-
-            return api_response
-        except ApiException as exception:
-            print(
-                "Exception when calling QuestionsApi->search_items_api_v1_questions_contains_post: %s\n" %
-                exception)
-            return None
+        )
+        response = self._get_api_instance(
+        ).search_items_begins_with_api_v1_questions_search_begins_with_post(body)
+        return response
 
     @log_method_call
     def _end_connection(self):
@@ -348,4 +288,4 @@ class Quiz01ServiceFromClient(Quiz01Service):
     @log_method_call
     def __del__(self):
         """_summary_."""
-        self._end_connection()
+        # self._end_connection()

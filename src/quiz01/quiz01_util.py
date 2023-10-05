@@ -1,10 +1,12 @@
 """Modulo Util con decorator para logs."""
+from functools import wraps
 import logging
+import os
 import time
 
 
 def log_method_call_no_params(func):
-    """Custom logger decorator to mark begin and end timestamps.
+    """Custom logging decorator to mark begin and end timestamps.
 
     Args:
         func (_type_): Function to be logged
@@ -36,7 +38,7 @@ def log_method_call_no_params(func):
 
 
 def log_method_call(func):
-    """Custom logger decorator to mark begin and end timestamps.
+    """Custom logging decorator to mark begin and end timestamps.
 
     Args:
         func (_type_): Function to be logged
@@ -69,3 +71,95 @@ def log_method_call(func):
         return result
 
     return wrapper
+
+
+def timely(func):
+    """_summary_.
+
+    Args:
+        func (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    func_name = func.__name__
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        logging.info(f"***** Start:{func_name} *****")
+
+        start = time.time()
+        result = func(*args, **kwargs)
+        duration = time.time() - start
+
+        logging.info(f"***** End:{func_name} ***** "
+                     f"| Elapsed Time:{round(duration, 2)}")
+
+        return result
+
+    return wrapper
+
+
+def getLog(logger_name: str) -> logging.Logger:
+    """_summary_.
+
+    Args:
+        logger_name (str): _description_
+    """
+    # https://docs.python.org/3/howto/logging.html
+
+    # create logger
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.DEBUG)
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # create formatter
+    # formatter = logging.Formatter(
+    #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(levelname)s|%(name)s|%(asctime)s|'
+                                  '%(filename)s:%(lineno)d|%(message)s')
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    # add ch to logger
+    logger.addHandler(ch)
+
+    return logger
+
+
+def set_default_logger():
+
+    DEFAULT_LOG_LEVEL = logging.INFO
+
+    if "LOG_LEVEL" in os.environ:
+        # For Lambda
+        log_level = logging.INFO  # os.environ["LOG_LEVEL"]
+    else:
+        log_level = DEFAULT_LOG_LEVEL  # Set default log level for local
+
+    root = logging.getLogger()
+    if len(logging.getLogger().handlers) > 0:
+        # For Lambda
+        for handler in root.handlers:
+            root.removeHandler(handler)
+            logging.basicConfig(
+                level=log_level,
+                format='[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(module)s] [%(funcName)s] [L%(lineno)d] [P%(process)d] [T%(thread)d] %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
+    else:
+        # For Local
+        l_name = os.getcwd() + '/' + 'count_mac_module.log'
+        logging.basicConfig(
+            filename=l_name,
+            level=log_level,
+            format='[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(module)s] [%(funcName)s] [L%(lineno)d] [P%(process)d] [T%(thread)d] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S')
+
+    logger = logging.getLogger(__name__)
+    logger.debug(
+        f"************* logging set for Lambda {os.getenv('AWS_LAMBDA_FUNCTION_NAME') } *************")

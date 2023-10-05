@@ -3,7 +3,9 @@ services:
 
   scrapper1:
     build: .
-    image: moisesjurad0/tmp.quiz01-scrapper.py.selenium
+    image: moisesjurad0/tmp.quiz01scraper.BOT
     #image: ghcr.io/moisesjurad0/scrapper-1
     env_file: .env
     tty: true
+    ports:
+      - 8000:8000

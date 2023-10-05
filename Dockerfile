@@ -1,4 +1,5 @@
 FROM squartle/python-chromium
+EXPOSE 8000
 # FROM docker.pkg.github.com/moisesjurad0/docker-python-chromium/python-chromium
 # FROM ghcr.io/moisesjurad0/python-chromium
 
@@ -35,3 +36,4 @@ RUN pip --no-cache-dir install -r requirements.txt
 COPY src .
 
 # CMD [ "python", "scrap01.py" ]
+CMD [uvicorn api:app]
