@@ -44,6 +44,7 @@ XPATH_ANSW_Q_CHEK_RADI = (
     ' | '
     '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
     'ion-list/ion-radio-group/ion-item')
+DEFAULT_SECTION = 'DEFAULT'
 
 
 class EnvInterpolation(configparser.BasicInterpolation):
@@ -202,14 +203,14 @@ def do_scraping(p_exam_number: int):
     print(f'v_uuid->{v_uuid}')
     logging.info(f'v_uuid->{v_uuid}')
 
-    driver_location = ini['DEFAULT']['driver_location']
-    binary_location = ini['DEFAULT']['binary_location']
-    headless = ini.getboolean('DEFAULT', 'headless')
-    do_correct_answers = ini.getboolean('DEFAULT', 'do_correct_answers')
+    driver_location = ini[DEFAULT_SECTION]['driver_location']
+    binary_location = ini[DEFAULT_SECTION]['binary_location']
+    headless = ini.getboolean(DEFAULT_SECTION, 'headless')
+    do_correct_answers = ini.getboolean(DEFAULT_SECTION, 'do_correct_answers')
     do_correct_answers_cache = ini.getboolean(
-        'DEFAULT', 'do_correct_answers_cache')
-    dont_override = ini.getboolean('DEFAULT', 'dont_override')
-    dont_store_answers = ini.getboolean('DEFAULT', 'dont_store_answers')
+        DEFAULT_SECTION, 'do_correct_answers_cache')
+    dont_overwrite = ini.getboolean(DEFAULT_SECTION, 'dont_overwrite')
+    dont_store_answers = ini.getboolean(DEFAULT_SECTION, 'dont_store_answers')
 
     options = Options()
     options.binary_location = binary_location
@@ -406,7 +407,7 @@ def do_scraping(p_exam_number: int):
             f_type,
             True,
             obj_service,
-            dont_override,
+            dont_overwrite,
             True,
             lista_put)
 
@@ -421,7 +422,7 @@ def do_scraping(p_exam_number: int):
             f_type,
             False,
             obj_service,
-            dont_override,
+            dont_overwrite,
             True,
             lista_put)
 
