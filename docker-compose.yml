@@ -3,7 +3,7 @@ services:
 
   scrapper1:
     build: .
-    image: moisesjurad0/tmp.quiz01scraper.bot
+    image: moisesjurad0/tmp.quiz01scraper.bot-api
     #image: ghcr.io/moisesjurad0/scrapper-1
     env_file: .env
     tty: true

@@ -1,61 +1,67 @@
-# quiz01-scrapper (python script)
+# scraper.quiz01.BOT (python)
 
 ![Tests](https://github.com/moisesjurad0/quiz01-scrapper.py.selenium/actions/workflows/main-pipeline.yml/badge.svg)
 
 Python proyect designed to interact with and scrap data out of a specific quizzes web site.
 Build to be deployed on docker :thumbsup::whale:
 
+- scraper.quiz01.BOT-API
+- scraper.quiz01.BOT-CLI
+
 ## Python script is builded with
 
-- [selenium](https://www.selenium.dev/)
-- beautifulsoup4 (bs4) => [get it](https://pypi.org/project/beautifulsoup4/), [read the docs](https://beautiful-soup-4.readthedocs.io/en/latest/).
-- requests => [get it](https://pypi.org/project/requests/), [read the docs](https://requests.readthedocs.io/en/latest/).
+- [Selenium](https://www.selenium.dev/)
+- Beautiful Soup (bs4) => [get it](https://pypi.org/project/beautifulsoup4/), [read the docs](https://beautiful-soup-4.readthedocs.io/en/latest/).
+- Requests (Py) => [get it](https://pypi.org/project/requests/), [read the docs](https://requests.readthedocs.io/en/latest/).
+- Swagger (python-client-generated)
+- FastAPI (Run Interface 1)
+- Typer  (Run Interface 2)
 
 ## It interacts with its own Serverless API on AWS
 
 - AWS API => <https://github.com/moisesJurad0/quiz01-scrapper.aws.serverless>
-  - [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/?icmpid=docs_homepage_compute)
-  - [AWS Lambda](https://docs.aws.amazon.com/lambda/index.html)
-  - [AWS Dynammo](https://docs.aws.amazon.com/dynamodb/index.html)  
-  - [BOTO3](https://docs.aws.amazon.com/serverless-application-model/?icmpid=docs_homepage_compute)
+  - [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/)
+  - [AWS Lambda](https://docs.aws.amazon.com/lambda/)
+  - [AWS Dynammo](https://docs.aws.amazon.com/dynamodb/)  
+  - [AWS API Gateway](https://docs.aws.amazon.com/apigateway/)
+  - [Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
 
 ## Docker Image
 
-### Docker Image available on
+This image is compatible with dotenv files.
 
-#### GitHub Packages
+Docker Image available on
 
-<https://github.com/moisesjurad0/quiz01-scrapper.py.selenium/pkgs/container/scrapper-1>
+1. Docker Image - Docker Hub
+    1. <https://hub.docker.com/repository/docker/squartle/scraper.quiz01.bot-api/general>
 
-```sh
-docker pull ghcr.io/moisesjurad0/scrapper-1:53
-# or
-docker pull ghcr.io/moisesjurad0/scrapper-1:latest
-# or 
-docker pull ghcr.io/moisesjurad0/scrapper-1
-```
+        ```sh
+        docker pull squartle/scraper.quiz01.bot-api:latest
+        ```
 
-or
+    1. <https://hub.docker.com/repository/docker/squartle/scrapper-1/general>
 
-#### Docker Hub
+        ```sh
+        docker pull squartle/scrapper-1:latest
+        ```
 
-<https://hub.docker.com/repository/docker/squartle/scrapper-1/general>
+1. Docker Image - GitHub Packages
 
-```sh
-docker pull squartle/scrapper-1:53
-# or
-docker pull squartle/scrapper-1:latest
-# or 
-docker pull squartle/scrapper-1
-```
+    1. <https://github.com/moisesjurad0/quiz01-scrapper.py.selenium/pkgs/container/scrapper-1>
 
-### Docker Image is builded with
+        ```sh
+        docker pull ghcr.io/moisesjurad0/scrapper-1:latest
+        ```
 
-- [python3.9:alpine](https://hub.docker.com/layers/library/python/3.9-alpine3.17/images/sha256-de1fbc63ac86f6a65d160df2bc4f31affd1c3fdbe9ea0f68e1ba85054f8d1c6e?context=explore)
+### Docker Image - Build
+
+- [3.11-alpine](https://hub.docker.com/layers/library/python/3.11-alpine/images/sha256-219923ca7ebe7aa6cabdd241c8a42fcd72a7ac5b5ad55151dec9bd11bc04c99a?context=explore)
 - [chromium](https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium)
 - [chromium-chromedriver](<https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium-chromedriver>)
 
-### To run the Image follow this steps
+### Docker Image - Run
+
+To run the Image follow this steps
 
 ```sh
 # build the image
@@ -69,7 +75,7 @@ docker run -dt --env-file .env --name <pick-a-name-for-container> <pick-the-imag
 docker exec -it <pick-the-container-you-build-in-previous-step> sh
 ```
 
-### Or use compose
+Or use compose
 
 ```docker
 # on the proyect path
@@ -77,4 +83,17 @@ docker compose up
 
 # also can rebuild it before running up
 docker-compose up --build
+
+# detached mode
+docker-compose up --build -d
+```
+
+### Docker Image - Others
+
+```docker
+docker build -t squartle/scraper.quiz01.bot-api .#
+
+#remember to push to docker hub
+
+docker run --env-file .env -p 80:80  squartle/scraper.quiz01.bot-api
 ```

@@ -1,4 +1,4 @@
-FROM squartle/python-chromium
+FROM squartle/python-chromium:3.11-alpine
 EXPOSE 80
 # FROM docker.pkg.github.com/moisesjurad0/docker-python-chromium/python-chromium
 # FROM ghcr.io/moisesjurad0/python-chromium

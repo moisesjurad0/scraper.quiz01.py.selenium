@@ -37,7 +37,7 @@ You will be able to:
 * **Run questions** Run the bot and get a message if its bussys.
 """
 app = FastAPI(
-    title="quiz01.scraper.BOT-API",
+    title="scraper.quiz01.BOT-API",
     description=description,
     summary="do run of the bot.",
     version="0.0.1",

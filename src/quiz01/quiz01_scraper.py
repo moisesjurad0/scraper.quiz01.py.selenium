@@ -45,6 +45,7 @@ XPATH_ANSW_Q_CHEK_RADI = (
     '//*[starts-with(@id, "question-")]/ion-card/ion-card-content/div/'
     'ion-list/ion-radio-group/ion-item')
 DEFAULT_SECTION = 'DEFAULT'
+exam_number_gb: int = 0
 
 
 class EnvInterpolation(configparser.BasicInterpolation):
@@ -132,7 +133,6 @@ def _roll_n_click_to_answer(driver, scrapped_answer):
 
 def _process_feeback_ticks(
         p_ticks,
-        p_exam_number: int,
         p_question_text,
         p_type,
         p_flag_correct,
@@ -141,6 +141,7 @@ def _process_feeback_ticks(
         p_flag_batch: bool = False,
         p_lista_put: List[QuestionModel] = []):
     for tick in p_ticks:
+        f_answer_ok_text = ''
         if p_type == RADIO_BOOL:
             f_answer_ok_text = (
                 tick.previous_sibling.next_element.next_element.
@@ -155,14 +156,14 @@ def _process_feeback_ticks(
         logging.info(f_answer_ok_text)
         if p_flag_batch:
             if p_flag_dont_override:
-                stored_data = p_obj_service.get_cache(exam_number)
+                stored_data = p_obj_service.get_cache(exam_number_gb)
                 filtered_data = list(filter(
                     lambda i:
                         i['id'] == p_question_text and
                         i['question_type'] == p_type and
                         i['answer_text'] == f_answer_ok_text and
                         i['is_correct'] == p_flag_correct and
-                        i['exam_number'] == p_exam_number,
+                        i['exam_number'] == exam_number_gb,
                         stored_data['Items']))
 
                 if filtered_data:
@@ -174,21 +175,25 @@ def _process_feeback_ticks(
                     question_type=p_type,
                     answer_text=f_answer_ok_text,
                     is_correct=p_flag_correct,
-                    exam_number=p_exam_number,
+                    exam_number=exam_number_gb,
                     last_modified=config.currentDT.isoformat()))
         else:
             p_obj_service.put(
                 f'{p_question_text}---{f_answer_ok_text}',
-                p_question_text, p_type, f_answer_ok_text,
-                p_flag_correct, p_exam_number, config.currentDT.isoformat())
+                p_question_text,
+                p_type,
+                f_answer_ok_text,
+                p_flag_correct,
+                exam_number_gb,
+                config.currentDT.isoformat())
 
 
 @log_method_call
 def do_scraping(p_exam_number: int):
     """Main method."""
-    global exam_number
-    exam_number = p_exam_number
-    exam_section = f'EXAM-{exam_number}'
+    global exam_number_gb
+    exam_number_gb = p_exam_number
+    exam_section = f'EXAM-{exam_number_gb}'
     quiz_url = ini[exam_section]['quiz_url']
     x_api_key = ini[exam_section]['x-api-key']
     api_put = ini[exam_section]['api_put']
@@ -291,7 +296,7 @@ def do_scraping(p_exam_number: int):
             _mark_dom_answers(driver, scraped_answers_to_choose)
         elif do_correct_answers and do_correct_answers_cache:
             logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
-            stored_data = obj_service.get_cache(exam_number)
+            stored_data = obj_service.get_cache(exam_number_gb)
             filtered_data = list(filter(
                 lambda i:
                 i['id'] == div_question_text and
@@ -402,7 +407,6 @@ def do_scraping(p_exam_number: int):
             '.circular-tick,.circular-tick-holo')
         _process_feeback_ticks(
             correct_ticks,
-            exam_number,
             f_question_text,
             f_type,
             True,
@@ -417,7 +421,6 @@ def do_scraping(p_exam_number: int):
             ':not(.circular-tick)')
         _process_feeback_ticks(
             incorrect_ticks,
-            exam_number,
             f_question_text,
             f_type,
             False,
