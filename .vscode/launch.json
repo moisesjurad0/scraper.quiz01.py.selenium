@@ -12,6 +12,16 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/src/",
+            "envFile": "${workspaceFolder}/.env.local"
+        },
+        {
+            "name": "cli.py 1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/src/",
             "envFile": "${workspaceFolder}/.env.local",
             "args": [
                 "1"
