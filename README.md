@@ -10,6 +10,7 @@ Build to be deployed on docker :thumbsup::whale:
 
 ## Python script is builded with
 
+- [Playwright](https://playwright.dev/python/)
 - [Selenium](https://www.selenium.dev/)
 - Beautiful Soup (bs4) => [get it](https://pypi.org/project/beautifulsoup4/), [read the docs](https://beautiful-soup-4.readthedocs.io/en/latest/).
 - Requests (Py) => [get it](https://pypi.org/project/requests/), [read the docs](https://requests.readthedocs.io/en/latest/).
@@ -53,11 +54,17 @@ Docker Image available on
         docker pull ghcr.io/moisesjurad0/scrapper-1:latest
         ```
 
-### Docker Image - Build
+### Docker Image - Dependencies
+
+Playwrigth
+
+- [playwright/python:v1.34.0-jammy](https://mcr.microsoft.com/en-us/product/playwright/python/about)
+
+Selenium
 
 - [3.11-alpine](https://hub.docker.com/layers/library/python/3.11-alpine/images/sha256-219923ca7ebe7aa6cabdd241c8a42fcd72a7ac5b5ad55151dec9bd11bc04c99a?context=explore)
 - [chromium](https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium)
-- [chromium-chromedriver](<https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium-chromedriver>)
+- [chromium-chromedriver](https://pkgs.alpinelinux.org/package/edge/community/x86_64/chromium-chromedriver)
 
 ### Docker Image - Run
 
@@ -88,12 +95,14 @@ docker-compose up --build
 docker-compose up --build -d
 ```
 
-### Docker Image - Others
+### Docker Build
 
-```docker
-docker build -t squartle/scraper.quiz01.bot-api .#
+```sh
+# docker tag my-image:original my-image:new-tag
+docker tag squartle/scraper.quiz01.bot-api:latest squartle/scraper.quiz01.bot-api:selenium
+docker build -t squartle/scraper.quiz01.bot-api:playwright .
+docker tag squartle/scraper.quiz01.bot-api:playwright squartle/scraper.quiz01.bot-api:latest
 
-#remember to push to docker hub
-
+# run
 docker run --env-file .env -p 80:80  squartle/scraper.quiz01.bot-api
 ```

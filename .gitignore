@@ -248,3 +248,4 @@ logs/
 **/*.log
 .reports/
 .env.*
+src/state.json

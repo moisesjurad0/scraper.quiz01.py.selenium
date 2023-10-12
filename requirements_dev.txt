@@ -1,15 +1,12 @@
 beautifulsoup4==4.11.2 # bs4
-selenium==4.8.2
-requests==2.27.1
-#lxml
+pytest-playwright
+pytest-xdist
 tox
 pytest
 pytest-cov
 flake8
 flake8-docstrings
 mypy
-#lxml
-types-requests
 types-beautifulsoup4
 ./python-client-generated/
 isort

@@ -1,7 +1,6 @@
 beautifulsoup4==4.11.2
-selenium==4.8.2
-requests==2.27.1
-# -e ./python-client-generated/
+pytest-playwright
+pytest-xdist
 ./python-client-generated/
 typer
 rich
