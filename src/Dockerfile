@@ -1,7 +1,10 @@
 # Define function directory
 ARG FUNCTION_DIR="/function"
 
-FROM mcr.microsoft.com/playwright/python:v1.21.0-focal as build-image
+FROM mcr.microsoft.com/playwright/python:v1.21.0-focal
+
+EXPOSE 80
+EXPOSE 443
 
 # Install aws-lambda-cpp build dependencies
 RUN apt-get update && \
@@ -18,7 +21,7 @@ ARG FUNCTION_DIR
 RUN mkdir -p ${FUNCTION_DIR}
 
 # Copy function code
-COPY python-client-generated ./
+COPY python-client-generated ./python-client-generated
 COPY requirements.txt ./
 COPY app/* ${FUNCTION_DIR}
 
@@ -26,19 +29,9 @@ COPY app/* ${FUNCTION_DIR}
 # Install the runtime interface client
 RUN pip3 install -r requirements.txt --target ${FUNCTION_DIR}
 
-# Multi-stage build: grab a fresh copy of the base image
-FROM mcr.microsoft.com/playwright/python:v1.21.0-focal
 
-EXPOSE 80
-EXPOSE 443
-
-# Include global arg in this stage of the build
-ARG FUNCTION_DIR
 # Set working directory to function root directory
 WORKDIR ${FUNCTION_DIR}
-
-# Copy in the build image dependencies
-COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 
 ENTRYPOINT [ "/usr/bin/python", "-m", "awslambdaric" ]
 CMD [ "app.handler" ]
