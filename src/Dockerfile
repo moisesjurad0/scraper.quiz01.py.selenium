@@ -18,8 +18,10 @@ ARG FUNCTION_DIR
 RUN mkdir -p ${FUNCTION_DIR}
 
 # Copy function code
-COPY app/. ${FUNCTION_DIR}
-COPY python-client-generated requirements.txt /
+COPY python-client-generated ./
+COPY requirements.txt ./
+COPY app/* ${FUNCTION_DIR}
+
 
 # Install the runtime interface client
 RUN pip3 install -r requirements.txt --target ${FUNCTION_DIR}
