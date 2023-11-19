@@ -1,6 +1,17 @@
-beautifulsoup4==4.11.2 # bs4
+beautifulsoup4==4.11.2
 pytest-playwright
 pytest-xdist
+./python-client-generated/
+typer
+rich
+fastapi>=0.68.0,<0.69.0
+pydantic>=1.8.0,<2.0.0
+uvicorn>=0.15.0,<0.16.0
+mangum
+boto3
+awslambdaric
+
+isort
 tox
 pytest
 pytest-cov
@@ -8,10 +19,3 @@ flake8
 flake8-docstrings
 mypy
 types-beautifulsoup4
-./python-client-generated/
-isort
-typer
-rich
-fastapi>=0.68.0,<0.69.0
-pydantic>=1.8.0,<2.0.0
-uvicorn>=0.15.0,<0.16.0

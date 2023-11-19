@@ -5,24 +5,25 @@ import os
 import threading
 import uuid
 from enum import Enum, IntEnum
-# import time
-from pathlib import Path
 
 import uvicorn
 from fastapi import Depends, FastAPI  # , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 from quiz01 import config, quiz01_scraper, quiz01_util
 
-script_path = Path(__file__).absolute()
-script_dir = Path(__file__).parent.absolute()
-log_folder = script_dir / 'logs'
-log_folder.mkdir(parents=True, exist_ok=True)
+# ************ ENABLE ON DEV ENV ************
+# from pathlib import Path
+# script_path = Path(__file__).absolute()
+# script_dir = Path(__file__).parent.absolute()
+# log_folder = script_dir / 'logs'
+# log_folder.mkdir(parents=True, exist_ok=True)
 default_log_args = {
     'level': logging.INFO,
     'format': '[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(module)s] [%(funcName)s] [L%(lineno)d] [P%(process)d] [T%(thread)d] %(message)s',
     'datefmt': '%Y-%m-%d %H:%M:%S',
-    'filename': log_folder / f'quiz01scraper.api.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
+    # 'filename': log_folder / f'quiz01scraper.api.{config.currentDT.strftime("%Y%m%d%H%M%S")}.log',
     'force': True,
 }
 logging.basicConfig(**default_log_args)
@@ -46,7 +47,7 @@ app = FastAPI(
         "url": "https://linktr.ee/moisesjurad0",
 
     },
-    # root_path='/Prod'
+    root_path=os.getenv('ROOT_PATH', default='')
 )
 app.add_middleware(
     CORSMiddleware,
@@ -150,3 +151,5 @@ def check():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+handler = Mangum(app)

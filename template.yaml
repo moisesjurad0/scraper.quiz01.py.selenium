@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  bot-playwright-stk1 | FastAPI & Playwright stack
+Globals:
+  Function:
+    #Runtime: python3.10
+    Architectures:
+      - x86_64
+    Timeout: 120
+    Environment:
+      Variables:
+        MY_VAR1: hello_my_var1
+        MPLCONFIGDIR: /tmp
+        AWS_SAM_STACK_NAME: bot-playwright-stk1
+        ROOT_PATH: /Prod
+Resources:
+  BOTPlaywrightFn:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      PackageType: Image     
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: "*"
+      Events:
+        MyEventSource01:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref BOTPlaywrightApiG
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./src
+      DockerTag: python3.10-v1
+  BOTPlaywrightApiG:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+Outputs:
+  BOTPlaywrightApiG:
+    Description: "API Gateway endpoint url"
+    Value: !Sub "https://${BOTPlaywrightApiG}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  BOTPlaywrightFn:
+    Description: "BOTPlaywrightFn Lambda Function ARN"
+    Value: !GetAtt BOTPlaywrightFn.Arn

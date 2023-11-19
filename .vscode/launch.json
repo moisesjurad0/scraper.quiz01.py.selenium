@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "name": "selenium-scrap01:FnBOTPlaywright",
+            "invokeTarget": {
+                "target": "template",
+                "templatePath": "${workspaceFolder}/template.yaml",
+                "logicalId": "FnBOTPlaywright"
+            },
+            "lambda": {
+                "payload": {},
+                "environmentVariables": {}
+            }
+        },
+        {
             "name": "api.py",
             "type": "python",
             "request": "launch",
