@@ -1,7 +1,7 @@
 beautifulsoup4==4.11.2
 pytest-playwright
 pytest-xdist
-./python-client-generated/
+#./python-client-generated/ # AL REGRESAR CHECAR XQ NO INSTALA ESTO. puede ser xq no lo hubiese copiado.
 typer
 rich
 fastapi>=0.68.0,<0.69.0
