@@ -5,4 +5,4 @@ resolve_s3 = true
 s3_prefix = "bot-playwright-stk1"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
-image_repositories = []
+image_repositories = ["BOTPlaywrightFn=572867055940.dkr.ecr.us-east-1.amazonaws.com/botplaywrightstk137307b0f/botplaywrightfnf2323940repo"]
