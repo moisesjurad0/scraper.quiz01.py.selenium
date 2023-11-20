@@ -51,7 +51,6 @@ XPATH_RESUME_2 = '//*[@id="contents"]/ion-card[2]'
 XPATH_RESUME_3 = '//*[@id="contents"]/div'
 
 
-
 class EnvInterpolation(configparser.BasicInterpolation):
     """Interpolation which expands environment variables in values."""
     # https://stackoverflow.com/questions/26586801/configparser-and-string-interpolation-with-env-variable
@@ -176,13 +175,17 @@ def _process_feeback_ticks(
 @log_method_call
 def do_scraping(p_exam_number: int):
     """Main method."""
+    logging.info('do_scraping hito 1')
     with sync_playwright() as playwright:
+        logging.info('do_scraping hito 2')
         run(playwright, p_exam_number)
+        logging.info('do_scraping hito 3')
 
 
 def run(playwright: Playwright, p_exam_number) -> None:
     """Main method."""
-    # *** INITIALIZE VARAIBLES ***
+    logging.info('INITIALIZE VARIBLES')
+    # *** INITIALIZE VARIBLES ***
     global exam_number_gb
     exam_number_gb = p_exam_number
     exam_section = f'EXAM-{exam_number_gb}'
@@ -207,7 +210,8 @@ def run(playwright: Playwright, p_exam_number) -> None:
 
     # *** START SCRAPING ***
     logging.info('START SCRAPING')
-    browser = playwright.chromium.launch(headless=headless)  # , slow_mo=1 * 1000)
+    browser = playwright.chromium.launch(
+        headless=headless)  # , slow_mo=1 * 1000)
     context = browser.new_context()
     page = context.new_page()
     page.goto(quiz_url)
@@ -226,7 +230,8 @@ def run(playwright: Playwright, p_exam_number) -> None:
         # div_question_text = page.wait_for_selector(XPATH_ANSW_Q_DIV).inner_text().split("\n")[0]
         div_question_text_original = ''
         div_question_text = ''
-        div_question_text_original = page.wait_for_selector('.question-text').inner_text()
+        div_question_text_original = page.wait_for_selector(
+            '.question-text').inner_text()
         div_question_text = div_question_text_original.split("\n")[0]
 
         if div_question_text.startswith(STR_TOFC):
@@ -237,7 +242,8 @@ def run(playwright: Playwright, p_exam_number) -> None:
         print(div_question_text)
 
         # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
-        scraped_answers_to_choose = page.query_selector_all(XPATH_ANSW_Q_CHEK_RADI)
+        scraped_answers_to_choose = page.query_selector_all(
+            XPATH_ANSW_Q_CHEK_RADI)
 
         if not do_correct_answers:
             logging.info('SECTION - DUMMY ANSWERS')
@@ -258,7 +264,8 @@ def run(playwright: Playwright, p_exam_number) -> None:
                 api_answer_lc = [x['answer_text'] for x in api_data_filtered]
 
                 for s in scraped_answers_to_choose:
-                    s_txt = s.query_selector('.bbcode.cursor-pointer').inner_text()
+                    s_txt = s.query_selector(
+                        '.bbcode.cursor-pointer').inner_text()
                     if s_txt in api_answer_lc:
                         s.click()
 
@@ -294,7 +301,8 @@ def run(playwright: Playwright, p_exam_number) -> None:
             # Define a function to check if the element has the expected value
             def check_element_content():
                 actual_value = div_question_text_original
-                new_value = page.wait_for_selector('.question-text').inner_text()
+                new_value = page.wait_for_selector(
+                    '.question-text').inner_text()
                 return actual_value == new_value
             # Wait for the element to reload with the expected value
             # page.wait_for_function(check_element_content())
@@ -302,7 +310,6 @@ def run(playwright: Playwright, p_exam_number) -> None:
             btn_next_or_finish_now.click()
             while check_element_content():
                 time.sleep(0.025)
-
 
         elif attribute_data_cy == 'finish-btn':
             btn_next_or_finish_now.click()

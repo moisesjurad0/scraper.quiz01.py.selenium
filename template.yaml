@@ -7,18 +7,26 @@ Globals:
     #Runtime: python3.10
     Architectures:
       - x86_64
-    Timeout: 120
+    Timeout: 360
     Environment:
       Variables:
-        MY_VAR1: hello_my_var1
-        MPLCONFIGDIR: /tmp
-        AWS_SAM_STACK_NAME: bot-playwright-stk1
         ROOT_PATH: /Prod
+        AWS_SAM_STACK_NAME: bot-playwright-stk1
+        SCRAP01_HEADLESS: 1
+        SCRAP01_DO_CORRECT_ANSW: 1
+        SCRAP01_DO_CORRECT_ANSW_CACHE: 1
+        SCRAP01_DONT_OVERW: 1
+        SCRAP01_DONT_STORE_ANSW: 1
+        SCRAP01_API_KEY_1: Please set the env variables in AWS SAM Template
+        SCRAP01_API_ENDPOINT_1: Please set the env variables in AWS SAM Template
+        SCRAP01_QUIZ_URL_1: Please set the env variables in AWS SAM Template
+        SCRAP01_QUIZ_URL_2: Please set the env variables in AWS SAM Template
+        SCRAP01_QUIZ_URL_3: Please set the env variables in AWS SAM Template
 Resources:
   BOTPlaywrightFn:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      PackageType: Image     
+      PackageType: Image
       Policies:
         - LambdaInvokePolicy:
             FunctionName: "*"

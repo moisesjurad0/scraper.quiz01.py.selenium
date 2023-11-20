@@ -1,7 +1,7 @@
 # Define function directory
 ARG FUNCTION_DIR="/function"
 
-FROM mcr.microsoft.com/playwright/python:v1.21.0-focal as build-image
+FROM mcr.microsoft.com/playwright/python:v1.39.0-focal AS build-image
 
 # Install aws-lambda-cpp build dependencies
 RUN apt-get update && \
@@ -27,7 +27,7 @@ COPY app/. ${FUNCTION_DIR}
 RUN pip3 install -r requirements.txt --target ${FUNCTION_DIR}
 
 # Multi-stage build: grab a fresh copy of the base image
-FROM mcr.microsoft.com/playwright/python:v1.21.0-focal
+FROM mcr.microsoft.com/playwright/python:v1.39.0-focal
 
 EXPOSE 80
 EXPOSE 443
