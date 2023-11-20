@@ -4,7 +4,7 @@ Returns:
     _type_: _description_
 """
 import time
-from playwright.sync_api import Playwright, sync_playwright, expect
+from playwright.sync_api import sync_playwright, expect
 import configparser
 import logging
 import os
@@ -175,15 +175,7 @@ def _process_feeback_ticks(
 @log_method_call
 def do_scraping(p_exam_number: int):
     """Main method."""
-    logging.info('do_scraping hito 1')
-    with sync_playwright() as playwright:
-        logging.info('do_scraping hito 2')
-        run(playwright, p_exam_number)
-        logging.info('do_scraping hito 3')
 
-
-def run(playwright: Playwright, p_exam_number) -> None:
-    """Main method."""
     logging.info('INITIALIZE VARIBLES')
     # *** INITIALIZE VARIBLES ***
     global exam_number_gb
@@ -208,131 +200,153 @@ def run(playwright: Playwright, p_exam_number) -> None:
     dont_overwrite = ini.getboolean(DEFAULT_SECTION, 'dont_overwrite')
     dont_store_answers = ini.getboolean(DEFAULT_SECTION, 'dont_store_answers')
 
-    # *** START SCRAPING ***
-    logging.info('START SCRAPING')
-    browser = playwright.chromium.launch(
-        headless=headless)  # , slow_mo=1 * 1000)
-    context = browser.new_context()
-    page = context.new_page()
-    page.goto(quiz_url)
+    with sync_playwright() as p:
+        # *** START SCRAPING ***
+        logging.info('SECTION - BROWSER LAUNCHING - START')
 
-    page.click(XPATH_1ST_BTN)
-    page.click(XPATH_2ND_BTN)
+        if headless:
+            browser = p.chromium.launch(
+                args=["--disable-gpu", "--single-process"])  # ,
+            # headless=headless)  # , slow_mo=1 * 1000)
+        else:
+            browser = p.chromium.launch()
 
-    # *** SAVING STATE ***
-    # https://playwright.dev/python/docs/next/auth
-    # storage = context.storage_state(path="state.json")
+        logging.info('SECTION - BROWSER LAUNCHING - END')
 
-    # *** ANSWERING QUESTIONS ***
-    logging.info('SECTION - ANSWERING QUESTIONS')
-    while True:
+        page = browser.new_page()
+        page.goto(quiz_url)
 
-        # div_question_text = page.wait_for_selector(XPATH_ANSW_Q_DIV).inner_text().split("\n")[0]
-        div_question_text_original = ''
-        div_question_text = ''
-        div_question_text_original = page.wait_for_selector(
-            '.question-text').inner_text()
-        div_question_text = div_question_text_original.split("\n")[0]
+        logging.info('SECTION - LANDED IN PAGE')
 
-        if div_question_text.startswith(STR_TOFC):
-            div_question_text = div_question_text.split(STR_TOFC)[1]
+        page.click(XPATH_1ST_BTN)
+        page.click(XPATH_2ND_BTN)
 
-        # div_question_text = div_question_text.split('\n')[0]
-        div_question_text = div_question_text.strip().replace('\xa0', ' ').strip()
-        print(div_question_text)
+        # *** SAVING STATE ***
+        # https://playwright.dev/python/docs/next/auth
+        # storage = context.storage_state(path="state.json")
 
-        # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
-        scraped_answers_to_choose = page.query_selector_all(
-            XPATH_ANSW_Q_CHEK_RADI)
-
-        if not do_correct_answers:
-            logging.info('SECTION - DUMMY ANSWERS')
-            for d in scraped_answers_to_choose:
-                d.click()
-        elif do_correct_answers and do_correct_answers_cache:
-            logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
-            api_data = obj_service.get_cache(exam_number_gb)
-            api_data_filtered = list(filter(
-                lambda i:
-                i['id'] == div_question_text and
-                i['is_correct'],
-                api_data['Items']))
-
-            if api_data_filtered:
-                logging.info('ITEM - DATA FOUND')
-
-                api_answer_lc = [x['answer_text'] for x in api_data_filtered]
-
-                for s in scraped_answers_to_choose:
-                    s_txt = s.query_selector(
-                        '.bbcode.cursor-pointer').inner_text()
-                    if s_txt in api_answer_lc:
-                        s.click()
-
-            else:
-                logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
-                for s in scraped_answers_to_choose:
-                    s.click()
-        elif do_correct_answers:
-            logging.info('SECTION - DO CORRECT ANSWERS')
-            api_data = obj_service.search_v2(
-                question=div_question_text, flag_correct=True)
-            if api_data['Items']:
-                logging.info('ITEM - DATA FOUND')
-                for d in api_data['Items']:
-                    for s in scraped_answers_to_choose:
-                        scraped_answer_txt = s.query_selector(
-                            '.bbcode.cursor-pointer').inner_text()
-                        if d['answer_text'] == scraped_answer_txt:
-                            s.click()
-                            break
-            else:
-                logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
-                for s in scraped_answers_to_choose:
-                    s.click()
-
-        # page.wait_for_selector(CSS_NEXT_OR_FINISH, state="clickable")
-        btn_next_or_finish_now = page.wait_for_selector(CSS_NEXT_OR_FINISH)
-
-        attribute_data_cy = btn_next_or_finish_now.get_attribute('data-cy')
-
-        if attribute_data_cy == 'continue-btn':
-
-            # Define a function to check if the element has the expected value
-            def check_element_content():
-                actual_value = div_question_text_original
-                new_value = page.wait_for_selector(
+        try:
+            # *** ANSWERING QUESTIONS ***
+            logging.info('SECTION - ANSWERING QUESTIONS')
+            while True:
+                # div_question_text = page.wait_for_selector(XPATH_ANSW_Q_DIV).inner_text().split("\n")[0]
+                div_question_text_original = ''
+                div_question_text = ''
+                div_question_text_original = page.wait_for_selector(
                     '.question-text').inner_text()
-                return actual_value == new_value
-            # Wait for the element to reload with the expected value
-            # page.wait_for_function(check_element_content())
+                div_question_text = div_question_text_original.split("\n")[0]
 
-            btn_next_or_finish_now.click()
-            while check_element_content():
-                time.sleep(0.025)
+                if div_question_text.startswith(STR_TOFC):
+                    div_question_text = div_question_text.split(STR_TOFC)[1]
 
-        elif attribute_data_cy == 'finish-btn':
-            btn_next_or_finish_now.click()
-            page.query_selector(XPATH_FINISH).click()
-            break
+                # div_question_text = div_question_text.split('\n')[0]
+                div_question_text = div_question_text.strip().replace('\xa0', ' ').strip()
+                print(div_question_text)
 
-    logging.info(
-        'HACER UN WAIT DE LA PAGINA DE RESULTADO, '
-        'DEL LA PARTE DE ARRIBA Y LA DE ABAJO DE LA PAGINA')
+                # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
+                scraped_answers_to_choose = page.query_selector_all(
+                    XPATH_ANSW_Q_CHEK_RADI)
 
-    # ************ MIGRATION MARKER 1 ****************
+                if not do_correct_answers:
+                    logging.info('SECTION - DUMMY ANSWERS')
+                    for d in scraped_answers_to_choose:
+                        d.click()
+                elif do_correct_answers and do_correct_answers_cache:
+                    logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
+                    api_data = obj_service.get_cache(exam_number_gb)
+                    api_data_filtered = list(filter(
+                        lambda i:
+                        i['id'] == div_question_text and
+                        i['is_correct'],
+                        api_data['Items']))
 
-    page.wait_for_selector(XPATH_RESUME_1)
-    page.wait_for_selector(XPATH_RESUME_2)
-    page.wait_for_selector(XPATH_RESUME_3)
+                    if api_data_filtered:
+                        logging.info('ITEM - DATA FOUND')
 
-    logging.info('SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
+                        api_answer_lc = [x['answer_text']
+                                         for x in api_data_filtered]
 
-    page_source = page.content()
+                        for s in scraped_answers_to_choose:
+                            s_txt = s.query_selector(
+                                '.bbcode.cursor-pointer').inner_text()
+                            if s_txt in api_answer_lc:
+                                s.click()
+
+                    else:
+                        logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
+                        for s in scraped_answers_to_choose:
+                            s.click()
+                elif do_correct_answers:
+                    logging.info('SECTION - DO CORRECT ANSWERS')
+                    api_data = obj_service.search_v2(
+                        question=div_question_text, flag_correct=True)
+                    if api_data['Items']:
+                        logging.info('ITEM - DATA FOUND')
+                        for d in api_data['Items']:
+                            for s in scraped_answers_to_choose:
+                                scraped_answer_txt = s.query_selector(
+                                    '.bbcode.cursor-pointer').inner_text()
+                                if d['answer_text'] == scraped_answer_txt:
+                                    s.click()
+                                    break
+                    else:
+                        logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
+                        for s in scraped_answers_to_choose:
+                            s.click()
+
+                # page.wait_for_selector(CSS_NEXT_OR_FINISH, state="clickable")
+                btn_next_or_finish_now = page.wait_for_selector(
+                    CSS_NEXT_OR_FINISH)
+
+                attribute_data_cy = btn_next_or_finish_now.get_attribute(
+                    'data-cy')
+
+                if attribute_data_cy == 'continue-btn':
+
+                    # Define a function to check if the element has the expected
+                    # value
+                    def check_element_content():
+                        actual_value = div_question_text_original
+                        new_value = page.wait_for_selector(
+                            '.question-text').inner_text()
+                        return actual_value == new_value
+                    # Wait for the element to reload with the expected value
+                    # page.wait_for_function(check_element_content())
+
+                    btn_next_or_finish_now.click()
+                    while check_element_content():
+                        time.sleep(0.025)
+
+                elif attribute_data_cy == 'finish-btn':
+                    btn_next_or_finish_now.click()
+                    page.query_selector(XPATH_FINISH).click()
+                    break
+
+            logging.info('SECTION - WAITING RESULTS PAGE - 1')
+            page.wait_for_selector(XPATH_RESUME_1)
+            logging.info('SECTION - WAITING RESULTS PAGE - 2')
+            page.wait_for_selector(XPATH_RESUME_2)
+            logging.info('SECTION - WAITING RESULTS PAGE - 3')
+            page.wait_for_selector(XPATH_RESUME_3)
+
+            logging.info('SECTION - SAVING CONTENT FROM BROWSER - START')
+            page_source = page.content()
+            logging.info('SECTION - SAVING CONTENT FROM BROWSER - END')
+
+        except Exception as e:
+            logging.error(str(e), exc_info=True)
+
+        logging.info('SECTION - CLOSING BROWSER - START')
+        browser.close()
+        logging.info('SECTION - CLOSING BROWSER - END')
+
+    logging.info('SECTION - LOAD BS4 FROM BROWSER')
     soup = BeautifulSoup(page_source, 'html.parser')
 
     contador_preguntas = 0
     feedbacks = soup.find_all('div', class_='feedback')
+
+    logging.info('SECTION - SCANNING CORRECT ANSWERS FROM FEEDBACK PAGE')
 
     lista_put: List[QuestionModel] = []
     for feedback in feedbacks:

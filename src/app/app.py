@@ -1,17 +1,18 @@
 """main script module without package."""
 import datetime
+import json
 import logging
 import os
 import threading
-import uuid
-from enum import Enum, IntEnum
+from enum import IntEnum
 
+import boto3
 import uvicorn
 from fastapi import Depends, FastAPI  # , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-
-from quiz01 import config, quiz01_scraper, quiz01_util
+from quiz01 import quiz01_scraper  # ,config , quiz01_util
+from starlette.requests import Request
 
 # ************ ENABLE ON DEV ENV ************
 # from pathlib import Path
@@ -89,14 +90,29 @@ def run(exam_number: ExamNumberEnumModel,
         session_id: int = Depends(get_session_id)):
     """Run the bot.
 
+    This execution takes about 1 minute to finish,
+    so API Gateway drops the connection with 504 or 502 at second 29
+    but the execution still continues.
+
+    A solution to this is calling the method with lambda async.
+        This can be achieve by using a flag in API Gateway
+        but it's not compatible with AWS Lambda Proxy.
+
+    Another solutions:
+    1. Using a Lambda async invocation from another lambda invocation
+    2. Using AWS Step Functions
+    3. Using AWS SQS & SNS
+
+
     Args:
         exam_number (int): exam number to be interacted/scraped
 
     Returns:
-        _type_: _description_
+        str: A JSON str is returned with a simple message.
     """
     logging.info('START --> run')
     STR_MESSAGE = 'message'
+    STR_ERROR = 'error'
     retorno = None
     flag_busy = False
 
@@ -110,30 +126,97 @@ def run(exam_number: ExamNumberEnumModel,
             "session_id": session_id,
             "start_time": datetime.datetime.now()}
 
-        run_bot_thread(exam_number)
-        retorno = {STR_MESSAGE: 'task queued..'}
+        try:
+            quiz01_scraper.do_scraping(exam_number.value)
+        except Exception as e:
+            logging.error(str(e), exc_info=True)
+            print(e)
+            retorno = {
+                STR_MESSAGE: 'Task ended with error..',
+                STR_ERROR: str(e)}
+        else:
+            retorno = {STR_MESSAGE: 'Task ended OK..'}
+        finally:
+            sessions.pop(exam_number.value)
 
     logging.info('END --> run')
     return retorno
 
 
-@quiz01_util.threaded
-def run_bot_thread(exam_number: ExamNumberEnumModel):
-    """_summary_.
+@app.post("/run_async/{exam_number}")
+def run_lambda_async(request: Request, exam_number: ExamNumberEnumModel):
+    """This method call run but using async parameter using with Boto3.
 
     Args:
-        exam_number (ExamNumberEnumModel): _description_
+        request (Request): this parameter is kind of invisible.
+            It is defined in starlette for using with Mangum and FastAPI
+        exam_number (ExamNumberEnumModel): The number of exam to be executed.
+            This will be passed to run method.
     """
-    logging.info('START --> run_bot_thread')
-    try:
-        quiz01_scraper.do_scraping(exam_number.value)
-    except Exception as e:
-        logging.error(str(e), exc_info=True)
-        print(e)
-    finally:
-        # this line should be in the async env, that's why the method
-        sessions.pop(exam_number.value)
-    logging.info('END --> run_bot_thread')
+    logging.info('START --> run_lambda_async')
+
+    logging.info('---')
+    logging.info('---')
+    logging.info('---')
+    logging.info(request.scope)
+    logging.info('---')
+    logging.info('---')
+    logging.info('---')
+    logging.info(request.scope['aws.event'])
+    logging.info('---')
+    logging.info('---')
+    logging.info('---')
+    logging.info(request.scope['aws.context'])
+    logging.info('---')
+    logging.info('---')
+    logging.info('---')
+
+    function_arn = request.scope['aws.context'].invoked_function_arn
+    lambda_client = boto3.client('lambda')
+    response = lambda_client.invoke(
+        FunctionName=function_arn,
+        InvocationType='Event',
+        Payload=json.dumps({
+            "resource": "/{proxy+}",
+            "path": '/run/' + str(exam_number.value),
+            "httpMethod": "POST",
+            "requestContext": {
+                "accountId": "123456789012",
+                "resourceId": "123456",
+                "stage": "prod",
+                "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
+                "requestTime": "09/Apr/2015:12:34:56 +0000",
+                "requestTimeEpoch": 1428582896000,
+                "identity": {
+                    "cognitoIdentityPoolId": None,
+                    "accountId": None,
+                    "cognitoIdentityId": None,
+                    "caller": None,
+                    "accessKey": None,
+                    "sourceIp": "127.0.0.1",
+                    "cognitoAuthenticationType": None,
+                    "cognitoAuthenticationProvider": None,
+                    "userArn": None,
+                    "userAgent": "Custom User Agent String",
+                    "user": None
+                },
+                "path": "/prod/path/to/resource",
+                "resourcePath": "/{proxy+}",
+                "httpMethod": "POST",
+                "apiId": "1234567890",
+                "protocol": "HTTP/1.1"
+            }
+            # "requestContext": request.scope['aws.context'],
+            # "requestContext": "{}"
+            # "path": request.scope['aws.event']['path'],  # "/my/custom/path",
+            # {"param1": "value1","param2": "value2"},
+            # "pathParameters": request.scope['aws.context']['path_params'],
+            # {"data": "payload_data"}
+            # "body": request.scope['aws.event']['body']
+        })
+    )
+    logging.info(response)
+    logging.info('END --> run_lambda_async')
 
 
 @app.get("/check/")

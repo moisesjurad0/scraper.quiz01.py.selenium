@@ -4,7 +4,6 @@ import logging
 from pprint import pprint
 from typing import List
 
-import requests
 import swagger_client
 from swagger_client.rest import ApiException
 

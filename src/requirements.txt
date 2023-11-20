@@ -1,6 +1,7 @@
 beautifulsoup4==4.11.2
-pytest-playwright
-pytest-xdist
+playwright==1.39
+# pytest-playwright
+# pytest-xdist
 ./python-client-generated/
 typer
 rich
