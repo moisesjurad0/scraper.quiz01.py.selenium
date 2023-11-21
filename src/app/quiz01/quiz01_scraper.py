@@ -209,7 +209,7 @@ def do_scraping(p_exam_number: int):
                 args=["--disable-gpu", "--single-process"])  # ,
             # headless=headless)  # , slow_mo=1 * 1000)
         else:
-            browser = p.chromium.launch()
+            browser = p.chromium.launch(headless=headless)
 
         logging.info('SECTION - BROWSER LAUNCHING - END')
 

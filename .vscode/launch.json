@@ -22,20 +22,20 @@
             "name": "api.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/api.py",
+            "program": "${workspaceFolder}/src/app/api.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/src/",
+            "cwd": "${workspaceFolder}/src/app/",
             "envFile": "${workspaceFolder}/.env.local"
         },
         {
             "name": "cli.py 1",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/cli.py",
+            "program": "${workspaceFolder}/src/app/cli.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/src/",
+            "cwd": "${workspaceFolder}/src/app/",
             "envFile": "${workspaceFolder}/.env.local",
             "args": [
                 "1"
