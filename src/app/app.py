@@ -86,7 +86,8 @@ def get_session_id():
 
 
 @app.post("/run/{exam_number}")
-def run(exam_number: ExamNumberEnumModel,
+def run(
+        exam_number: ExamNumberEnumModel,
         session_id: int = Depends(get_session_id)):
     """Run the bot.
 
@@ -144,7 +145,9 @@ def run(exam_number: ExamNumberEnumModel,
 
 
 @app.post("/run_async/{exam_number}")
-def run_lambda_async(request: Request, exam_number: ExamNumberEnumModel):
+def run_lambda_async(
+        request: Request,
+        exam_number: ExamNumberEnumModel):
     """This method call run but using async parameter using with Boto3.
 
     Args:
@@ -232,7 +235,7 @@ def check():
     return {'sessions': sessions}
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 handler = Mangum(app)

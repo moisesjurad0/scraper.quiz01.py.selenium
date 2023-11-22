@@ -45,10 +45,11 @@ exam_number_gb: int = 0
 CSS_NEXT_OR_FINISH = ('ion-button[data-cy="continue-btn"]'
                       ','
                       'ion-button[data-cy="finish-btn"]')
-XPATH_FINISH = '//*[@id="test_confirm_finish"]'
+XPATH_CONFIRM_FINISH = '//*[@id="test_confirm_finish"]'
 XPATH_RESUME_1 = '//*[@id="contents"]/ion-card[1]'
 XPATH_RESUME_2 = '//*[@id="contents"]/ion-card[2]'
 XPATH_RESUME_3 = '//*[@id="contents"]/div'
+CSS_QUES_TXT = '.question-text'
 
 
 class EnvInterpolation(configparser.BasicInterpolation):
@@ -213,7 +214,8 @@ def do_scraping(p_exam_number: int):
 
         logging.info('SECTION - BROWSER LAUNCHING - END')
 
-        page = browser.new_page()
+        context = browser.new_context()
+        page = context.new_page()
         page.goto(quiz_url)
 
         logging.info('SECTION - LANDED IN PAGE')
@@ -229,11 +231,10 @@ def do_scraping(p_exam_number: int):
             # *** ANSWERING QUESTIONS ***
             logging.info('SECTION - ANSWERING QUESTIONS')
             while True:
-                # div_question_text = page.wait_for_selector(XPATH_ANSW_Q_DIV).inner_text().split("\n")[0]
                 div_question_text_original = ''
                 div_question_text = ''
-                div_question_text_original = page.wait_for_selector(
-                    '.question-text').inner_text()
+                div_question_text_original = page.locator(
+                    CSS_QUES_TXT).first.inner_text()
                 div_question_text = div_question_text_original.split("\n")[0]
 
                 if div_question_text.startswith(STR_TOFC):
@@ -244,13 +245,12 @@ def do_scraping(p_exam_number: int):
                 print(div_question_text)
 
                 # SECTION - ANSWERING QUESTIONS - CHECKBOXES or RADIO BUTTONS
-                scraped_answers_to_choose = page.query_selector_all(
-                    XPATH_ANSW_Q_CHEK_RADI)
+                scraped_answers_to_choose = page.locator(
+                    XPATH_ANSW_Q_CHEK_RADI).all()
 
                 if not do_correct_answers:
                     logging.info('SECTION - DUMMY ANSWERS')
-                    for d in scraped_answers_to_choose:
-                        d.click()
+                    map(lambda s: s.click(), scraped_answers_to_choose)
                 elif do_correct_answers and do_correct_answers_cache:
                     logging.info('SECTION - DO CORRECT ANSWERS - CACHE')
                     api_data = obj_service.get_cache(exam_number_gb)
@@ -267,15 +267,14 @@ def do_scraping(p_exam_number: int):
                                          for x in api_data_filtered]
 
                         for s in scraped_answers_to_choose:
-                            s_txt = s.query_selector(
+                            s_txt = s.locator(
                                 '.bbcode.cursor-pointer').inner_text()
                             if s_txt in api_answer_lc:
                                 s.click()
 
                     else:
                         logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
-                        for s in scraped_answers_to_choose:
-                            s.click()
+                        map(lambda s: s.click(), scraped_answers_to_choose)
                 elif do_correct_answers:
                     logging.info('SECTION - DO CORRECT ANSWERS')
                     api_data = obj_service.search_v2(
@@ -284,50 +283,58 @@ def do_scraping(p_exam_number: int):
                         logging.info('ITEM - DATA FOUND')
                         for d in api_data['Items']:
                             for s in scraped_answers_to_choose:
-                                scraped_answer_txt = s.query_selector(
+                                scraped_answer_txt = s.locator(
                                     '.bbcode.cursor-pointer').inner_text()
                                 if d['answer_text'] == scraped_answer_txt:
                                     s.click()
                                     break
                     else:
                         logging.info('ITEM - DATA NOT FOUND - DUMMY ANSWERS')
-                        for s in scraped_answers_to_choose:
-                            s.click()
+                        map(lambda s: s.click(), scraped_answers_to_choose)
 
-                # page.wait_for_selector(CSS_NEXT_OR_FINISH, state="clickable")
-                btn_next_or_finish_now = page.wait_for_selector(
-                    CSS_NEXT_OR_FINISH)
-
+                btn_next_or_finish_now = page.locator(CSS_NEXT_OR_FINISH)
+                btn_next_or_finish_now.wait_for()
                 attribute_data_cy = btn_next_or_finish_now.get_attribute(
                     'data-cy')
 
                 if attribute_data_cy == 'continue-btn':
 
-                    # Define a function to check if the element has the expected
-                    # value
-                    def check_element_content():
+                    logging.info('click NEXT')
+                    btn_next_or_finish_now.click()
+                    logging.info('click NEXT - DONE')
+
+                    def check_element_content() -> bool:
+                        """Define a function to check if the element has the expected value
+
+                        Returns:
+                            bool: _description_
+                        """
                         actual_value = div_question_text_original
-                        new_value = page.wait_for_selector(
-                            '.question-text').inner_text()
+                        new_value = page.locator(
+                            CSS_QUES_TXT).first.inner_text()
+                        # new_value_locator = page.locator(CSS_QUES_TXT).first
+                        # new_value = new_value_locator.inner_text()
+                        # expect(new_value_locator).to_have_text(new_value)
                         return actual_value == new_value
                     # Wait for the element to reload with the expected value
-                    # page.wait_for_function(check_element_content())
-
-                    btn_next_or_finish_now.click()
                     while check_element_content():
-                        time.sleep(0.025)
+                        time.sleep(0.100)
 
                 elif attribute_data_cy == 'finish-btn':
+                    logging.info('click FINISH')
                     btn_next_or_finish_now.click()
-                    page.query_selector(XPATH_FINISH).click()
+                    logging.info('click FINISH - DONE')
+                    logging.info('click CONFIRM FINISH')
+                    page.click(XPATH_CONFIRM_FINISH)
+                    logging.info('click CONFIRM FINISH - DONE')
                     break
 
             logging.info('SECTION - WAITING RESULTS PAGE - 1')
-            page.wait_for_selector(XPATH_RESUME_1)
+            page.locator(XPATH_RESUME_1).wait_for()
             logging.info('SECTION - WAITING RESULTS PAGE - 2')
-            page.wait_for_selector(XPATH_RESUME_2)
+            page.locator(XPATH_RESUME_2).wait_for()
             logging.info('SECTION - WAITING RESULTS PAGE - 3')
-            page.wait_for_selector(XPATH_RESUME_3)
+            page.locator(XPATH_RESUME_3).wait_for()
 
             logging.info('SECTION - SAVING CONTENT FROM BROWSER - START')
             page_source = page.content()
@@ -335,10 +342,11 @@ def do_scraping(p_exam_number: int):
 
         except Exception as e:
             logging.error(str(e), exc_info=True)
-
-        logging.info('SECTION - CLOSING BROWSER - START')
-        browser.close()
-        logging.info('SECTION - CLOSING BROWSER - END')
+        else:
+            logging.info('SECTION - CLOSING BROWSER - START')
+            context.close()
+            browser.close()
+            logging.info('SECTION - CLOSING BROWSER - END')
 
     logging.info('SECTION - LOAD BS4 FROM BROWSER')
     soup = BeautifulSoup(page_source, 'html.parser')

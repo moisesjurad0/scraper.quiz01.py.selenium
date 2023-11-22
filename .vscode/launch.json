@@ -22,7 +22,7 @@
             "name": "api.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/app/api.py",
+            "program": "${workspaceFolder}/src/app/app.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${workspaceFolder}/src/app/",

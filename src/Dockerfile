@@ -40,6 +40,8 @@ WORKDIR ${FUNCTION_DIR}
 
 # Copy in the build image dependencies
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
+RUN python -m playwright install
+# RUN playwright install
 
 ENTRYPOINT [ "/usr/bin/python", "-m", "awslambdaric" ]
 CMD [ "app.handler" ]
