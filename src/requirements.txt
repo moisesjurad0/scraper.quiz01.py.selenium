@@ -1,5 +1,6 @@
 beautifulsoup4==4.11.2
 playwright==1.39
+# playwright==1.21
 # pytest-playwright
 # pytest-xdist
 ./python-client-generated/
