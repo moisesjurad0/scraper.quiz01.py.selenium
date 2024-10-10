@@ -39,7 +39,7 @@ def test_analyze_feedback_question(monkeypatch):
 def test_main():
     """_summary_."""
     try:
-        quiz01_scraper.do_scraping(1)
+        quiz01_scraper.do_scraping()
     except Exception:
         pass
 
@@ -50,8 +50,8 @@ def test_main_mokeyed(monkeypatch):
     Args:
         monkeypatch (_type_): _description_
     """
-    monkeypatch.setattr(quiz01_scraper, "do_scrapping", lambda: None)
-    assert quiz01_scraper.do_scraping(1) is None
+    monkeypatch.setattr(quiz01_scraper, "do_scraping", lambda: None)
+    assert quiz01_scraper.do_scraping() is None
 
 
 ###############
