@@ -3,6 +3,7 @@
 # import pytest
 # import src.quiz01_scrapper
 from .. import quiz01_scraper
+
 # from src.quiz01_scrapper import _analyze_feedback_question, main
 
 
@@ -19,10 +20,12 @@ def test_analyze_feedback_question(monkeypatch):
     monkeypatch.setattr(
         quiz01_scraper,
         "_analyze_feedback_question",
-        lambda x: string1, string2
+        lambda x: string1,
+        string2,
     )
-    assert quiz01_scraper._analyze_feedback_question(
-        feedback) == string1, string2
+    assert (
+        quiz01_scraper._analyze_feedback_question(feedback) == string1
+    ), string2
 
 
 # @pytest.mark.parametrize(
@@ -36,7 +39,7 @@ def test_analyze_feedback_question(monkeypatch):
 def test_main():
     """_summary_."""
     try:
-        quiz01_scraper.do_scraping()
+        quiz01_scraper.do_scraping(1)
     except Exception:
         pass
 
@@ -47,12 +50,8 @@ def test_main_mokeyed(monkeypatch):
     Args:
         monkeypatch (_type_): _description_
     """
-    monkeypatch.setattr(
-        quiz01_scraper,
-        "do_scrapping",
-        lambda: None
-    )
-    assert quiz01_scraper.do_scraping() is None
+    monkeypatch.setattr(quiz01_scraper, "do_scrapping", lambda: None)
+    assert quiz01_scraper.do_scraping(1) is None
 
 
 ###############
